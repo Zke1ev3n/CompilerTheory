@@ -1,0 +1,68 @@
+Token type: Preprocessor
+Value: #include<stdio.h>
+Location: test1.c:1:1
+
+Token type: Preprocessor
+Value: #define A(a, b) (a+b)
+Location: test1.c:2:1
+
+Token type: Keyword
+Value: int
+Location: test1.c:3:1
+
+Token type: Identifier
+Value: main
+Location: test1.c:3:5
+
+Token type: Punctuator (OpenParen)
+Value: (
+Location: test1.c:3:9
+
+Token type: Punctuator (CloseParen)
+Value: )
+Location: test1.c:3:10
+
+Token type: Punctuator (OpenBrace)
+Value: {
+Location: test1.c:3:11
+
+Token type: Identifier
+Value: printf
+Location: test1.c:4:5
+
+Token type: Punctuator (OpenParen)
+Value: (
+Location: test1.c:4:11
+
+Token type: StringLiteral
+Value: "hello world\n"
+Location: test1.c:4:12
+
+Token type: Punctuator (CloseParen)
+Value: )
+Location: test1.c:4:27
+
+Token type: Punctuator (Semicolon)
+Value: ;
+Location: test1.c:4:28
+
+Token type: Punctuator (CloseBrace)
+Value: }
+Location: test1.c:5:1
+
+Token type: EOF
+Value: 
+Location: test1.c:6:1
+
+Result:
+File Name: test1.c
+Total Characters: 84
+Total Lines: 6
+Keyword: 1
+Identifier: 2
+Punctuator: 7
+Constant: 0
+String Literal: 1
+Preprocessor: 2
+Unknown: 0
+Error: 0
