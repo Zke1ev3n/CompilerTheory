@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/LL1-Parser/LL_1_grammer.cpp
+LL_1_grammer.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/LL1-Parser/LL_1_grammer.h
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/LL1-Parser/LL_1_grammer.h
+iostream
+-
+algorithm
+-
+vector
+-
+deque
+-
+map
+-
+string
+-
+iomanip
+-
+stack
+-
+
