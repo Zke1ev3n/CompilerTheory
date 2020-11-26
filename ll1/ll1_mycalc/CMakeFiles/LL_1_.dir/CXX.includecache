@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/lexer.h
+list
+-
+string
+-
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/ll1.h
+iostream
+-
+algorithm
+-
+vector
+-
+deque
+-
+map
+-
+string
+-
+iomanip
+-
+stack
+-
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/main.cc
+iostream
+-
+fstream
+-
+sstream
+-
+lexer.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/lexer.h
+ll1.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/ll1.h
+

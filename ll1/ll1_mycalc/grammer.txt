@@ -1,0 +1,17 @@
+NUM 0
++ 1
+- 2
+* 3
+/ 4
+( 5
+) 6
+
+Expr->Expr+Term
+Expr->Expr-Term
+Expr->Term
+Term->Term*Factor
+Term->Term/Factor
+Term->Factor
+Factor->(Expr)
+Factor->NUM
+Factor->-Factor
