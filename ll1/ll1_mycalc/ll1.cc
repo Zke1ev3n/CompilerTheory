@@ -11,16 +11,6 @@
 
 void LL1::init(const string filename){
     // start = "E";
-    // nonterminal.emplace_back("E");
-    // nonterminal.emplace_back("T");
-    // nonterminal.emplace_back("F");
-    // terminal.emplace_back("+");
-    // terminal.emplace_back("-");
-    // terminal.emplace_back("*");
-    // terminal.emplace_back("/");
-    // terminal.emplace_back("(");
-    // terminal.emplace_back(")");
-    // terminal.emplace_back("num");//代表数字
     ifstream input;
     string line;
     string current_symbol;
@@ -132,148 +122,153 @@ void LL1::print_test()
 
     cout << "---------------------------" << endl;
     cout << "first set:" << endl;
-    for (auto i:first) {
-        cout << i.first << " : ";
-        for (int j = 0; j < i.second.size(); j++)
-            if (j == i.second.size() - 1)
-                cout << i.second[j];
-            else
-                cout << i.second[j] << " , ";
-        cout << endl;
-    }
+	for(auto it = first.begin(); it != first.end(); ++it) {
+		cout<<it->first<<" : ";
+		for(auto firsts_it = it->second.begin(); firsts_it != it->second.end(); ++firsts_it) {
+			cout<<*firsts_it<<" ";
+		}
+		cout<<"\n";
+	}
+	cout<<"\n";
+
 
     cout << "---------------------------" << endl;
     cout << "follow set:" << endl;
-    for (auto i:follow) {
-        cout << i.first << " : ";
-        for (int j = 0; j < i.second.size(); j++)
-            if (j == i.second.size() - 1)
-                cout << i.second[j];
-            else
-                cout << i.second[j] << " , ";
-        cout << endl;
-    }
+	for(auto it = follow.begin(); it != follow.end(); ++it) {
+		cout<<it->first<<" : ";
+		for(auto follows_it = it->second.begin(); follows_it != it->second.end(); ++follows_it) {
+			cout<<*follows_it<<" ";
+		}
+		cout<<"\n";
+	}
+	cout<<"\n";
 
 }
 
-vector<string> LL1::get_first_set(string to_get_first)//构建first集
+/*
+      first(Epsilon) -> EmptySet
+      first(A -> a) -> { a } 
+                        
+      first(A -> A B) -> { first(A) U first( B),   if nullable(A)
+                        { first(A),              otherwise
+      first(A -> A1 | A2 | ... | AN) -> first(A1) U first(A2 U ... U first(AN)
+*/
+
+void LL1::get_first_set(string to_get_first)//构建first集
 {
-    vector<string> mid;
+  	// cout<<"Finding firsts of "<<non_term<<"\n";
+
     for (auto i:deduction) {
-        if (i.left == to_get_first) {
-            auto iter = first.find(to_get_first);
-            if (iter != first.end())
-                mid = first[to_get_first];
-            string head = i.right.front();
-            for (auto nt:nonterminal) {
-                if (head[0] == nt[0]) {
-                    return get_first_set(head);
-                }
-            }
-            for (auto t:terminal) {
-                if (head[0] == t[0]) {
-                    if (find(mid.begin(), mid.end(), t) == mid.end())//若没有该终结符，则加入first集
-                        mid.push_back(t);
-                    break;
-                }
-            }
-        }
-    }
-    return mid;
+		// Find productions of the non terminal
+		if(i.left != to_get_first) {
+			continue;
+		}
+
+		// cout<<"Processing production "<<it->first<<"->"<<it->second<<"\n";
+
+		vector<string> rhs = i.right;
+		// Loop till a non terminal or no epsilon variable found
+        for(auto iter = rhs.begin(); iter != rhs.end(); iter++) {
+			// If first char in production a non term, add it to firsts list
+            if(find(nonterminal.begin(), nonterminal.end(), *iter) == nonterminal.end()) {
+                first[to_get_first].insert(*iter);
+				break;
+			}
+			else {
+				// If char in prod is non terminal and whose firsts has no yet been found out
+				// Find first for that non terminal
+				if(first[*iter].empty()) {
+                    //cout<<*iter<<endl;
+					get_first_set(*iter);
+				}
+				// If variable doesn't have epsilon, stop loop
+                // nullable集也表示first集中包含空
+				if(first[*iter].find("~") == first[*iter].end()) {
+					first[to_get_first].insert(first[*iter].begin(), first[*iter].end());
+					break;
+				}
+
+                //如果属于nullable
+				set<string> firsts_copy(first[*iter].begin(), first[*iter].end());
+
+                //如果当前非终结符不是最后一个，则推导符号属于nullable
+				// Remove epsilon from firsts if not the last variable
+				if(iter + 1 != rhs.end()) {
+					firsts_copy.erase("~");
+				}
+
+				// Append firsts of that variable
+				first[to_get_first].insert(firsts_copy.begin(), firsts_copy.end());
+			}
+		}
+		
+	}
+
 }
 
 void LL1::first_set()
 {
     for (auto i:nonterminal)
-        first[i] = get_first_set(i);
+        get_first_set(i);
 }
 
-// void LL1::follow_set()
-// {
-//     for (auto i:nonterminal)
-//         follow[i] = get_follow_set(i);
-// }
+void LL1::follow_set()
+{
+    for (auto i:nonterminal)
+        get_follow_set(i);
+}
 
-// vector<string> LL1::get_follow_set(string to_get_follow)//构建follow集
-// {
-//     if (!follow[to_get_follow].empty())
-//         return follow[to_get_follow];
-//     vector<string> mid;
-//     if (to_get_follow == "E")
-//         mid.emplace_back("$");
-//     for (auto i:deduction) {
-//         int cur_ch = i.right.find(to_get_follow);
-//         int length = to_get_follow.size();
-//         if (cur_ch < 0 || (length == 1 && i.right[cur_ch + 1] == '\'') || to_get_follow == i.left)
-//             continue;
+void LL1::get_follow_set(string to_get_follow)//构建follow集
+{
+    // cout<<"Finding follow of "<<non_term<<"\n";
+    for (auto i:deduction) {
 
-//         if (cur_ch == i.right.size() - 1) {
-//             if (i.left != i.right.substr(cur_ch, cur_ch))
-//                 continue;
-//             vector<string> temp = get_follow_set(i.left);
-//             for (auto i:temp) {
-//                 if (i != "~" && find(mid.begin(), mid.end(), i) == mid.end())
-//                     mid.push_back(i);
-//             }
-//         } else if (cur_ch == i.right.size() - 2) {
-//             string two_words = i.right.substr(cur_ch, i.right.size() - 1);
-//             if (i.left == two_words)
-//                 continue;
-//             if (find(nonterminal.begin(), nonterminal.end(), two_words) != nonterminal.end()) {
-//                 vector<string> temp = get_follow_set(i.left);
+		// finished is true when finding follow from this production is complete
+		bool finished = true;
+		auto ch = i.right.begin();
 
-//                 for (auto i:temp) {
-//                     if (find(mid.begin(), mid.end(), i) == mid.end())
-//                         mid.push_back(i);
-//                 }
-//             } else {
-//                 cur_ch++;
-//                 string mid2 = i.right.substr(cur_ch, cur_ch);
-//                 if ((find(terminal.begin(), terminal.end(), mid2) != terminal.end()) &&
-//                     (find(mid.begin(), mid.end(), mid2) == mid.end()))
-//                     mid.push_back(mid2);
-//                 else {
-//                     vector<string> temp = get_first_set(mid2);
+		// Skip variables till reqd non terminal
+		for(;ch != i.right.end() ; ++ch) {
+			if(*ch == to_get_follow) {
+				finished = false;
+				break;
+			}
+		}
+		++ch;
 
-//                     for (auto j:temp) {
-//                         if (j != "~") {
-//                             if (find(mid.begin(), mid.end(), j) == mid.end())
-//                                 mid.push_back(j);
-//                         } else {
-//                             vector<string> temp2 = get_follow_set(i.left);
+		for(;ch != i.right.end() && !finished; ++ch) {
+			// If non terminal, just append to follow
+            if(find(nonterminal.begin(), nonterminal.end(), *ch) == nonterminal.end()) {
+				follow[to_get_follow].insert(*ch);
+				finished = true;
+				break;
+			}
 
-//                             for (auto k:temp2) {
-//                                 if (k != "~" && find(mid.begin(), mid.end(), k) == mid.end())
-//                                     mid.push_back(k);
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//         } else {
-//             cur_ch++;
-//             string two_words = i.right.substr(cur_ch, i.right.size() - 1);
-//             if (find(nonterminal.begin(), nonterminal.end(), two_words) != nonterminal.end()) {
-//                 vector<string> temp = get_first_set(two_words);
+			set<string> firsts_copy(first[*ch]);
+			// If char's firsts doesnt have epsilon follow search is over 
+			if(firsts_copy.find("~") == firsts_copy.end()) {
+				follow[to_get_follow].insert(firsts_copy.begin(), firsts_copy.end());
+				finished = true;
+				break;
+			}
+			// Else next char has to be checked after appending firsts to follow
+			firsts_copy.erase("~");
+			follow[to_get_follow].insert(firsts_copy.begin(), firsts_copy.end());
 
-//                 for (auto j:temp) {
-//                     if (j != "~") {
-//                         if (find(mid.begin(), mid.end(), j) == mid.end())
-//                             mid.push_back(j);
-//                     } else {
-//                         vector<string> temp2 = get_follow_set(i.left);
+		}
 
-//                         for (auto k:temp2) {
-//                             if (find(mid.begin(), mid.end(), k) == mid.end())
-//                                 mid.push_back(k);
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     return mid;
-// }
+		// If end of production, follow same as follow of variable
+		if(ch == i.right.end() && !finished) {
+			// Find follow if it doesn't have
+			if(follow[i.left].empty()) {
+				get_follow_set(i.left);
+			}
+			follow[to_get_follow].insert(follow[i.left].begin(), follow[i.left].end());
+		}
+
+	}
+    
+}
 
 // void LL1::analysis_table()
 // {

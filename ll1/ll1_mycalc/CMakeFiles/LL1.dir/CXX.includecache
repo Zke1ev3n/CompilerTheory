@@ -6,12 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/lexer.h
-list
--
-string
--
-
 /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/ll1.cc
 ll1.h
 /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/ll1.h
@@ -37,16 +31,6 @@ iomanip
 -
 stack
 -
-
-/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/main.cc
-iostream
+set
 -
-fstream
--
-sstream
--
-lexer.h
-/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/lexer.h
-ll1.h
-/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/ll1/ll1_mycalc/ll1.h
 

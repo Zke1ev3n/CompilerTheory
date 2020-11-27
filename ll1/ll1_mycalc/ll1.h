@@ -15,6 +15,7 @@
 #include <string>
 #include <iomanip>
 #include <stack>
+#include <set>
 
 using namespace std;
 
@@ -33,7 +34,7 @@ class LL1
     //终结符集、非终结符集
     vector<string> nonterminal, terminal;
     //first集、follow集
-    map<string, vector<string>> first, follow;
+    map<string, set<string>> first, follow;
     //起始符
     string start;
     //用于预测分析程序中
@@ -57,9 +58,9 @@ public:
     //生成各非终结符的follow集
     void follow_set();
     //获取first集
-    vector<string> get_first_set(string to_get_first);
+    void get_first_set(string to_get_first);
     //获取follow集
-    vector<string> get_follow_set(string to_get_follow);
+    void get_follow_set(string to_get_follow);
     //生成预测分析表
     void analysis_table();
     //预测分析程序
