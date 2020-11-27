@@ -10,7 +10,7 @@
 //}
 
 void LL1::init(const string filename){
-    // start = "E";
+    int i = 0;
     ifstream input;
     string line;
     string current_symbol;
@@ -21,6 +21,10 @@ void LL1::init(const string filename){
         if(current_symbol[0] == '<' and current_symbol.back() == '>') {
             if(find(nonterminal.begin(), nonterminal.end(), current_symbol) == nonterminal.end()){
                 nonterminal.push_back(current_symbol);
+                if(i == 0) {
+                    start = current_symbol;
+                    i++;
+                }
             }
         }
         //跳过->符号
@@ -220,6 +224,9 @@ void LL1::follow_set()
 
 void LL1::get_follow_set(string to_get_follow)//构建follow集
 {
+    if(start == to_get_follow) {
+        follow[start].insert("$");
+    }
     // cout<<"Finding follow of "<<non_term<<"\n";
     for (auto i:deduction) {
 

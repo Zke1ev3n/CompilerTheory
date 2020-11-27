@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
     ll1.parse_bnf(filename);
     ll1.remove_direct_left_recursion();
     ll1.first_set();
+    ll1.follow_set();
     ll1.print_test();
 
     //开始校验
