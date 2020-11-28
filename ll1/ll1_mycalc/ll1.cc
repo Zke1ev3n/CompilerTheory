@@ -106,13 +106,13 @@ void LL1::print_test()
 {
     cout << "---------------------------" << endl;
     cout << "expresion:" << endl;
-    for (auto i: deduction){
-        cout << i.left << " -> ";
-        for(auto s : i.right){
+	for(int i=0; i < deduction.size(); i++){
+		cout << i << ". " << deduction[i].left << " -> ";
+        for(auto s : deduction[i].right){
             cout << s << " ";
         }
         cout << endl;
-    }
+	}
 
     cout << "---------------------------" << endl;
     cout << "nonterminal set:" << endl;
@@ -278,17 +278,16 @@ void LL1::get_follow_set(string to_get_follow)//构建follow集
     
 }
 
-void LL1::analysis_table()
+void LL1::print_table()
 {
     //TODO 更好的方式
     terminal.insert("$");
-    table = new string*[nonterminal.size()];
-    for(int i =0; i < nonterminal.size(); i++){
-        table[i] = new string[terminal.size()];
-    }
+ 	int table[nonterminal.size()][terminal.size()];
 
-    for(auto prod:deduction) {
-		vector<string> rhs = prod.right;
+	fill(&table[0][0], &table[0][0] + sizeof(table)/sizeof(table[0][0]), -1);
+
+	for(auto prod = deduction.begin(); prod != deduction.end(); ++prod) {
+		vector<string> rhs = prod->right;
 
 		set<string> next_list;
 		bool finished = false;
@@ -314,21 +313,20 @@ void LL1::analysis_table()
 		// If the whole rhs can be skipped through epsilon or reaching the end
 		// Add follow to next list
 		if(!finished) {
-			next_list.insert(follow[prod.left].begin(), follow[prod.left].end());
+			next_list.insert(follow[prod->left].begin(), follow[prod->left].end());
 		}
 
 
 		for(auto ch = next_list.begin(); ch != next_list.end(); ++ch) {
-			int row = distance(nonterminal.begin(), nonterminal.find(prod.left));
+			int row = distance(nonterminal.begin(), nonterminal.find(prod->left));
 			int col = distance(terminal.begin(), terminal.find(*ch));
-			//int prod_num = distance(gram.begin(), prod);
-            string prod_str = prod.left + "->" + *ch;
-			if(table[row][col] != "") {
-				cout<<"Collision at ["<<row<<"]["<<col<<"] for production "<<prod_str<<"\n";
+			int prod_num = distance(deduction.begin(), prod);
+            //string prod_str = prod.left + "->" + *ch;
+			if(table[row][col] != -1) {
+				cout<<"Collision at ["<<row<<"]["<<col<<"] for production "<<prod_num<<"\n";
 				continue;
 			}
-			//table[row][col] = prod_num;
-            table[row][col] = prod_str;
+			table[row][col] = prod_num;
 		}
 
 	}
@@ -343,7 +341,7 @@ void LL1::analysis_table()
 		cout<<*row<<"  ";
 		for(int col = 0; col < terminal.size(); ++col) {
 			int row_num = distance(nonterminal.begin(), row);
-			if(table[row_num][col] == "") {
+			if(table[row_num][col] == -1) {
 				cout<<"- ";
 				continue;
 			}
@@ -356,66 +354,66 @@ void LL1::analysis_table()
   
 }
 
-// void LL1::analysis_program(string text)
-// {
-//     char a;
-//     int cur = 0;
-//     stack<string> buffer;
-//     buffer.push("$");
-//     buffer.push(start);
+void LL1::analysis_program(string text)
+{
+    // char a;
+    // int cur = 0;
+    // stack<string> buffer;
+    // buffer.push("$");
+    // buffer.push(start);
 
-//     cout << "-------------------------------------------------------------------------------" << endl;
+    // cout << "-------------------------------------------------------------------------------" << endl;
 
-//     do {
-//         x = buffer.top();
-//         a = text[cur];
-//         if (x == "$" && a == '$')
-//             break;
-//         //判断x是否为终结符号
-//         bool judge = (find(terminal.begin(), terminal.end(), x) == terminal.end() && x != "n");
-//         if (!judge)//是终结符号
-//         {
-//             if (x[0] == a) {
-//                 cout << "match" << endl;
-//                 buffer.pop();
-//                 cur++;
-//             } else {
-//                 cout << "error" << endl;
-//                 return;
-//             }
-//         } else {
-//             string temp1(1, a);
-//             int i = number_non(x);
-//             int j = number_ter(temp1);
-//             if (table[i][j] != "") {
-//                 buffer.pop();
-//                 string temp2 = table[i][j];
-//                 cout << temp2 << endl;
-//                 temp2 = temp2.substr(temp2.find(">") + 1, temp2.length() - (temp2.find(">") + 1));
-//                 //逆序进栈
-//                 for (int i = temp2.size() - 1; i >= 0; i--) {
-//                     if (temp2[i] == 'm')
-//                         i -= 2;
-//                     if (temp2[i] == '~')
-//                         break;
-//                     if (temp2[i] == '\'') {
-//                         i--;
-//                         string temp3;
-//                         temp3 = temp2.substr(i, 2);
-//                         buffer.push(temp3);
-//                     } else {
-//                         string temp3;
-//                         temp3 = temp2.substr(i, 1);
-//                         buffer.push(temp3);
-//                     }
+    // do {
+    //     x = buffer.top();
+    //     a = text[cur];
+    //     if (x == "$" && a == '$')
+    //         break;
+    //     //判断x是否为终结符号
+    //     bool judge = (find(terminal.begin(), terminal.end(), x) == terminal.end() && x != "n");
+    //     if (!judge)//是终结符号
+    //     {
+    //         if (x[0] == a) {
+    //             cout << "match" << endl;
+    //             buffer.pop();
+    //             cur++;
+    //         } else {
+    //             cout << "error" << endl;
+    //             return;
+    //         }
+    //     } else {
+    //         string temp1(1, a);
+    //         int i = number_non(x);
+    //         int j = number_ter(temp1);
+    //         if (table[i][j] != "") {
+    //             buffer.pop();
+    //             string temp2 = table[i][j];
+    //             cout << temp2 << endl;
+    //             temp2 = temp2.substr(temp2.find(">") + 1, temp2.length() - (temp2.find(">") + 1));
+    //             //逆序进栈
+    //             for (int i = temp2.size() - 1; i >= 0; i--) {
+    //                 if (temp2[i] == 'm')
+    //                     i -= 2;
+    //                 if (temp2[i] == '~')
+    //                     break;
+    //                 if (temp2[i] == '\'') {
+    //                     i--;
+    //                     string temp3;
+    //                     temp3 = temp2.substr(i, 2);
+    //                     buffer.push(temp3);
+    //                 } else {
+    //                     string temp3;
+    //                     temp3 = temp2.substr(i, 1);
+    //                     buffer.push(temp3);
+    //                 }
 
-//                 }
-//             } else {
-//                 cout << "error" << endl;
-//                 return;
-//             }
-//         }
-//     } while (1);
-//     cout << "success" << endl;
-//     cout << "-------------------------------------------------------------------------------" << endl;
-// }
+    //             }
+    //         } else {
+    //             cout << "error" << endl;
+    //             return;
+    //         }
+    //     }
+    // } while (1);
+    // cout << "success" << endl;
+    // cout << "-------------------------------------------------------------------------------" << endl;
+}
