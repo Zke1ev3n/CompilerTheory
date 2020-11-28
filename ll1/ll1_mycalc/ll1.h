@@ -39,6 +39,8 @@ class LL1
     string start;
     //用于预测分析程序中
     string x;
+    //预测分析表
+    int** table;
 
 public:
     //初始化
@@ -60,7 +62,7 @@ public:
     //获取follow集
     void get_follow_set(string to_get_follow);
     //生成预测分析表
-    void print_table();
+    void analysis_table();
     //预测分析程序
     void analysis_program(string text);
 };

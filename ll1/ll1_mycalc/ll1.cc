@@ -278,13 +278,19 @@ void LL1::get_follow_set(string to_get_follow)//构建follow集
     
 }
 
-void LL1::print_table()
+void LL1::analysis_table()
 {
     //TODO 更好的方式
     terminal.insert("$");
- 	int table[nonterminal.size()][terminal.size()];
-
-	fill(&table[0][0], &table[0][0] + sizeof(table)/sizeof(table[0][0]), -1);
+	table = new int*[nonterminal.size()];
+    for(int i =0; i < nonterminal.size(); i++){
+        table[i] = new int[terminal.size()];
+    }
+	for(int i = 0; i < nonterminal.size(); i++){
+		for(int j = 0; j < terminal.size(); j++){
+			table[i][j] = -1;
+		}
+	}
 
 	for(auto prod = deduction.begin(); prod != deduction.end(); ++prod) {
 		vector<string> rhs = prod->right;
