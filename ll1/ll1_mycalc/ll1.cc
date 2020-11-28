@@ -281,62 +281,79 @@ void LL1::get_follow_set(string to_get_follow)//构建follow集
 void LL1::analysis_table()
 {
     //TODO 更好的方式
+    terminal.insert("$");
     table = new string*[nonterminal.size()];
     for(int i =0; i < nonterminal.size(); i++){
         table[i] = new string[terminal.size()];
     }
 
-    cout << "\n\ntable:" << endl;
-    cout << "-------------------------------------------------------------------------------------" << endl;
-    cout << setw(10);
-    terminal.insert("$");
-    for(auto col = terminal.begin(); col != terminal.end(); ++col) {
-            if(*col != "~")
-                cout<<*col<<setw(10);
-    }
+    for(auto prod:deduction) {
+		vector<string> rhs = prod.right;
 
-    cout << endl;
-    cout << "-------------------------------------------------------------------------------------" << endl;
+		set<string> next_list;
+		bool finished = false;
+		for(auto ch = rhs.begin(); ch != rhs.end(); ++ch) {
+            if(find(nonterminal.begin(), nonterminal.end(), *ch) == nonterminal.end()) {
+				if(*ch != "~") {
+					next_list.insert(*ch);
+					finished = true;
+					break;
+				}
+				continue;
+			}
 
-    for (auto i:nonterminal) {
-        vector<string> line;
-        cout  << i << setw(10);
-        //for (int j = 0; j < terminal.size(); j++) {
-        for (auto j:terminal){
-            if (j == "~")
-                continue;
-            if (find(first[i].begin(), first[i].end(), "~") != first[i].end() &&
-                find(follow[i].begin(), follow[i].end(), j) != follow[i].end()) {
-                line.emplace_back(i + "->~");
-                int row = distance(nonterminal.begin(), nonterminal.find(i));
-			    int col = distance(terminal.begin(), terminal.find(j));
-                table[row][col] = i + "->~";
-            } else if (find(first[i].begin(), first[i].end(), j) != first[i].end()) {
-                for (auto k:deduction) {
-                    if (k.left == i) {
-                        string temp = k.right[0];
-                        if (k.right[0] == j) {
-                            line.emplace_back(k.left + "->" + k.right[0]);
-                            int row = distance(nonterminal.begin(), nonterminal.find(i));
-			                int col = distance(terminal.begin(), terminal.find(j));
-                            table[row][col] = k.left + "->" + k.right[0];
-                        } else if (find(first[temp].begin(), first[temp].end(), j) != first[temp].end()) {
-                            line.emplace_back(k.left + "->" + k.right[0]);
-                            int row = distance(nonterminal.begin(), nonterminal.find(i));
-			                int col = distance(terminal.begin(), terminal.find(j));
-                            table[row][col] = k.left + "->" + k.right[0];
-                        }
+			set<string> firsts_copy(first[*ch].begin(), first[*ch].end());
+			if(firsts_copy.find("~") == firsts_copy.end()) {
+				next_list.insert(firsts_copy.begin(), firsts_copy.end());
+				finished = true;
+				break;
+			}
+			firsts_copy.erase("~");
+			next_list.insert(firsts_copy.begin(), firsts_copy.end());
+		}
+		// If the whole rhs can be skipped through epsilon or reaching the end
+		// Add follow to next list
+		if(!finished) {
+			next_list.insert(follow[prod.left].begin(), follow[prod.left].end());
+		}
 
-                    }
-                }
-            } else
-                line.emplace_back(" ");
-        }
-        for (auto out:line)
-            cout << setiosflags(ios::right) << setw(10) << out << resetiosflags(ios::right);
-        cout << "\n";
-    }
-    cout << "\n\n";
+
+		for(auto ch = next_list.begin(); ch != next_list.end(); ++ch) {
+			int row = distance(nonterminal.begin(), nonterminal.find(prod.left));
+			int col = distance(terminal.begin(), terminal.find(*ch));
+			//int prod_num = distance(gram.begin(), prod);
+            string prod_str = prod.left + "->" + *ch;
+			if(table[row][col] != "") {
+				cout<<"Collision at ["<<row<<"]["<<col<<"] for production "<<prod_str<<"\n";
+				continue;
+			}
+			//table[row][col] = prod_num;
+            table[row][col] = prod_str;
+		}
+
+	}
+	// Print parse table
+	cout<<"Parsing Table: \n";
+	cout<<"   ";
+	for(auto i = terminal.begin(); i != terminal.end(); ++i) {
+		cout<<*i<<" ";
+	}
+	cout<<"\n";
+	for(auto row = nonterminal.begin(); row != nonterminal.end(); ++row) {
+		cout<<*row<<"  ";
+		for(int col = 0; col < terminal.size(); ++col) {
+			int row_num = distance(nonterminal.begin(), row);
+			if(table[row_num][col] == "") {
+				cout<<"- ";
+				continue;
+			}
+			cout<<table[row_num][col]<<" ";
+		}
+		cout<<"\n";
+	}
+	cout<<"\n";
+
+  
 }
 
 // void LL1::analysis_program(string text)
