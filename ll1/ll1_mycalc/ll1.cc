@@ -10,7 +10,6 @@
 //}
 
 void LL1::init(const string filename){
-    int i = 0;
     ifstream input;
     string line;
     string current_symbol;
@@ -21,10 +20,6 @@ void LL1::init(const string filename){
         if(current_symbol[0] == '<' and current_symbol.back() == '>') {
             if(find(nonterminal.begin(), nonterminal.end(), current_symbol) == nonterminal.end()){
                 nonterminal.insert(current_symbol);
-                if(i == 0) {
-                    start = current_symbol;
-                    i++;
-                }
             }
         }
         //跳过->符号
@@ -41,6 +36,7 @@ void LL1::init(const string filename){
             }
 		}
     }
+	input.close();
 }
 
 void LL1::parse_bnf(const string filename) {
@@ -65,6 +61,8 @@ void LL1::parse_bnf(const string filename) {
 		}
         ll_pushback(deduction);
     }
+	start = deduction.begin()->left;
+	input.close();
 }
 
 void LL1::remove_direct_left_recursion()
@@ -219,16 +217,22 @@ void LL1::first_set()
 
 void LL1::follow_set()
 {
-    for (auto i:nonterminal)
-        get_follow_set(i);
+    //for (auto i:nonterminal)
+    //    get_follow_set(i);
+	cout<<"start: " << start <<endl;
+	follow[start].insert("$");
+	get_follow_set(start);
+	// Find follows for rest of variables
+	for(auto it = nonterminal.begin(); it != nonterminal.end(); ++it) {
+		if(follow[*it].empty()) {
+			get_follow_set(*it);
+		}
+	}
 }
 
 void LL1::get_follow_set(string to_get_follow)//构建follow集
 {
-    if(start == to_get_follow) {
-        follow[start].insert("$");
-    }
-    // cout<<"Finding follow of "<<non_term<<"\n";
+    //cout<<"Finding follow of "<<to_get_follow<<"\n";
     for (auto i:deduction) {
 
 		// finished is true when finding follow from this production is complete
@@ -242,6 +246,7 @@ void LL1::get_follow_set(string to_get_follow)//构建follow集
 				break;
 			}
 		}
+		if(*ch == i.left) continue;
 		++ch;
 
 		for(;ch != i.right.end() && !finished; ++ch) {
@@ -269,6 +274,7 @@ void LL1::get_follow_set(string to_get_follow)//构建follow集
 		if(ch == i.right.end() && !finished) {
 			// Find follow if it doesn't have
 			if(follow[i.left].empty()) {
+				//cout<<"i.left:" << i.left<<endl;
 				get_follow_set(i.left);
 			}
 			follow[to_get_follow].insert(follow[i.left].begin(), follow[i.left].end());
