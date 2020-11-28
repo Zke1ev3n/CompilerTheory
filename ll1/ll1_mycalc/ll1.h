@@ -32,7 +32,7 @@ class LL1
     //产生式
     vector<DEDUCTION> deduction;
     //终结符集、非终结符集
-    vector<string> nonterminal, terminal;
+    set<string> nonterminal, terminal;
     //first集、follow集
     map<string, set<string>> first, follow;
     //起始符
@@ -40,7 +40,8 @@ class LL1
     //用于预测分析程序中
     string x;
     //保存预测分析表
-    string table[7][10];
+    //c++11支持
+    string** table;
 
 public:
     //初始化
@@ -65,12 +66,6 @@ public:
     void analysis_table();
     //预测分析程序
     void analysis_program(string text);
-
-    int number_non(string s);
-
-    int number_ter(string s);
-    //处理数字
-    string number_process(string input);
 };
 
 #endif //LL_1_LL_1_GRAMMER_H

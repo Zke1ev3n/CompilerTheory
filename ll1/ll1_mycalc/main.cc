@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     ll1.first_set();
     ll1.follow_set();
     ll1.print_test();
-
+    ll1.analysis_table();
     //开始校验
 	// cout << "(Input empty string to exit.)\n";
 	// while (true)

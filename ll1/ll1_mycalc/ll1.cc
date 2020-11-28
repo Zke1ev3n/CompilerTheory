@@ -20,7 +20,7 @@ void LL1::init(const string filename){
         getline(ss, current_symbol, ' ');
         if(current_symbol[0] == '<' and current_symbol.back() == '>') {
             if(find(nonterminal.begin(), nonterminal.end(), current_symbol) == nonterminal.end()){
-                nonterminal.push_back(current_symbol);
+                nonterminal.insert(current_symbol);
                 if(i == 0) {
                     start = current_symbol;
                     i++;
@@ -32,11 +32,11 @@ void LL1::init(const string filename){
         while(getline(ss, current_symbol, ' ')) {                
              if(current_symbol[0] == '<' and current_symbol.back() == '>') {
                 if(find(nonterminal.begin(), nonterminal.end(), current_symbol) == nonterminal.end()){
-                    nonterminal.push_back(current_symbol);
+                    nonterminal.insert(current_symbol);
                 }
             }else{
                 if(find(terminal.begin(), terminal.end(), current_symbol) == terminal.end()) {
-                    terminal.push_back(current_symbol);
+                    terminal.insert(current_symbol);
                 }
             }
 		}
@@ -95,9 +95,9 @@ void LL1::remove_direct_left_recursion()
             mid.left = temp + "'";
             mid.right.push_back("~");
             deduction.push_back(mid);
-            nonterminal.emplace_back(temp + "'");
+            nonterminal.insert(temp + "'");
             if (find(terminal.begin(), terminal.end(), "~") == terminal.end())
-                terminal.emplace_back("~");
+                terminal.insert("~");
         }
     }
 }
@@ -158,6 +158,7 @@ void LL1::print_test()
       first(A -> A1 | A2 | ... | AN) -> first(A1) U first(A2 U ... U first(AN)
 */
 
+//TODO 实现不动点算法
 void LL1::get_first_set(string to_get_first)//构建first集
 {
   	// cout<<"Finding firsts of "<<non_term<<"\n";
@@ -277,52 +278,66 @@ void LL1::get_follow_set(string to_get_follow)//构建follow集
     
 }
 
-// void LL1::analysis_table()
-// {
-//     cout << "\n\ntable:" << endl;
-//     cout << "-------------------------------------------------------------------------------------" << endl;
-//     cout << setw(10);
-//     terminal.emplace_back("$");
-//     for (int i = 0; i < terminal.size(); i++) {
-//         if (terminal[i] != "~")
-//             cout << terminal[i] << setw(10);
-//     }
-//     cout << endl;
-//     cout << "-------------------------------------------------------------------------------------" << endl;
+void LL1::analysis_table()
+{
+    //TODO 更好的方式
+    table = new string*[nonterminal.size()];
+    for(int i =0; i < nonterminal.size(); i++){
+        table[i] = new string[terminal.size()];
+    }
 
-//     for (auto i:nonterminal) {
-//         vector<string> line;
-//         cout  << i << setw(10);
-//         for (int j = 0; j < terminal.size(); j++) {
-//             if (terminal[j] == "~")
-//                 continue;
-//             if (find(first[i].begin(), first[i].end(), "~") != first[i].end() &&
-//                 find(follow[i].begin(), follow[i].end(), terminal[j]) != follow[i].end()) {
-//                 line.emplace_back(i + "->~");
-//                 table[number_non(i)][number_ter(terminal[j])] = i + "->~";
-//             } else if (find(first[i].begin(), first[i].end(), terminal[j]) != first[i].end()) {
-//                 for (auto k:deduction) {
-//                     if (k.left == i) {
-//                         string temp = k.right.substr(0, 1);
-//                         if (k.right[0] == terminal[j][0]) {
-//                             line.emplace_back(k.left + "->" + k.right);
-//                             table[number_non(i)][number_ter(terminal[j])] = k.left + "->" + k.right;
-//                         } else if (find(first[temp].begin(), first[temp].end(), terminal[j]) != first[temp].end()) {
-//                             line.emplace_back(k.left + "->" + k.right);
-//                             table[number_non(i)][number_ter(terminal[j])] = k.left + "->" + k.right;
-//                         }
+    cout << "\n\ntable:" << endl;
+    cout << "-------------------------------------------------------------------------------------" << endl;
+    cout << setw(10);
+    terminal.insert("$");
+    for(auto col = terminal.begin(); col != terminal.end(); ++col) {
+            if(*col != "~")
+                cout<<*col<<setw(10);
+    }
 
-//                     }
-//                 }
-//             } else
-//                 line.emplace_back(" ");
-//         }
-//         for (auto out:line)
-//             cout << setiosflags(ios::right) << setw(10) << out << resetiosflags(ios::right);
-//         cout << "\n";
-//     }
-//     cout << "\n\n";
-// }
+    cout << endl;
+    cout << "-------------------------------------------------------------------------------------" << endl;
+
+    for (auto i:nonterminal) {
+        vector<string> line;
+        cout  << i << setw(10);
+        //for (int j = 0; j < terminal.size(); j++) {
+        for (auto j:terminal){
+            if (j == "~")
+                continue;
+            if (find(first[i].begin(), first[i].end(), "~") != first[i].end() &&
+                find(follow[i].begin(), follow[i].end(), j) != follow[i].end()) {
+                line.emplace_back(i + "->~");
+                int row = distance(nonterminal.begin(), nonterminal.find(i));
+			    int col = distance(terminal.begin(), terminal.find(j));
+                table[row][col] = i + "->~";
+            } else if (find(first[i].begin(), first[i].end(), j) != first[i].end()) {
+                for (auto k:deduction) {
+                    if (k.left == i) {
+                        string temp = k.right[0];
+                        if (k.right[0] == j) {
+                            line.emplace_back(k.left + "->" + k.right[0]);
+                            int row = distance(nonterminal.begin(), nonterminal.find(i));
+			                int col = distance(terminal.begin(), terminal.find(j));
+                            table[row][col] = k.left + "->" + k.right[0];
+                        } else if (find(first[temp].begin(), first[temp].end(), j) != first[temp].end()) {
+                            line.emplace_back(k.left + "->" + k.right[0]);
+                            int row = distance(nonterminal.begin(), nonterminal.find(i));
+			                int col = distance(terminal.begin(), terminal.find(j));
+                            table[row][col] = k.left + "->" + k.right[0];
+                        }
+
+                    }
+                }
+            } else
+                line.emplace_back(" ");
+        }
+        for (auto out:line)
+            cout << setiosflags(ios::right) << setw(10) << out << resetiosflags(ios::right);
+        cout << "\n";
+    }
+    cout << "\n\n";
+}
 
 // void LL1::analysis_program(string text)
 // {
@@ -386,57 +401,4 @@ void LL1::get_follow_set(string to_get_follow)//构建follow集
 //     } while (1);
 //     cout << "success" << endl;
 //     cout << "-------------------------------------------------------------------------------" << endl;
-// }
-
-// int LL1::number_non(string s)
-// {
-//     if (s == "E")
-//         return 1;
-//     else if (s == "T")
-//         return 2;
-//     else if (s == "F")
-//         return 3;
-//     else if (s == "E'")
-//         return 4;
-//     else if (s == "T'")
-//         return 5;
-// }
-
-// int LL1::number_ter(string s)
-// {
-//     if (s == "+")
-//         return 1;
-//     else if (s == "-")
-//         return 2;
-//     else if (s == "*")
-//         return 3;
-//     else if (s == "/")
-//         return 4;
-//     else if (s == "(")
-//         return 5;
-//     else if (s == ")")
-//         return 6;
-//     else if (s == "num" || s == "n")
-//         return 7;
-//     else if (s == "$")
-//         return 8;
-// }
-
-// string LL1::number_process(string input)
-// {
-//     bool flag = false;
-//     string result;
-//     for (int i = 0; i < input.length(); i++) {
-//         char c = input.at(i);
-//         if ('0' <= c && c <= '9') {
-//             if (!flag) {
-//                 result += "n";
-//             }
-//             flag = true;
-//         } else {
-//             result += c;
-//             flag = false;
-//         }
-//     }
-//     return result + "$";
 // }
