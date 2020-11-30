@@ -17,7 +17,7 @@ void LL1::init(const string filename){
     while(getline(input, line)) {
         stringstream ss(line);
         getline(ss, current_symbol, ' ');
-        if(current_symbol[0] == '<' and current_symbol.back() == '>') {
+        if(current_symbol[0] == '<' and current_symbol.back() == '>' && current_symbol.length() > 2) {
             if(find(nonterminal.begin(), nonterminal.end(), current_symbol) == nonterminal.end()){
                 nonterminal.insert(current_symbol);
             }
@@ -25,7 +25,7 @@ void LL1::init(const string filename){
         //跳过->符号
         getline(ss, current_symbol, ' ');
         while(getline(ss, current_symbol, ' ')) {                
-             if(current_symbol[0] == '<' and current_symbol.back() == '>') {
+             if(current_symbol[0] == '<' and current_symbol.back() == '>' && current_symbol.length() > 2) {
                 if(find(nonterminal.begin(), nonterminal.end(), current_symbol) == nonterminal.end()){
                     nonterminal.insert(current_symbol);
                 }
@@ -259,6 +259,7 @@ void LL1::get_follow_set(string to_get_follow)//构建follow集
 
 			set<string> firsts_copy(first[*ch]);
 			// If char's firsts doesnt have epsilon follow search is over 
+			//如果当前符号不属于nullable集合，则直接并上First集，并且跳出循环
 			if(firsts_copy.find("~") == firsts_copy.end()) {
 				follow[to_get_follow].insert(firsts_copy.begin(), firsts_copy.end());
 				finished = true;
@@ -362,70 +363,56 @@ void LL1::analysis_table()
 		cout<<"\n";
 	}
 	cout<<"\n";
-
-  
 }
 
-void LL1::analysis_program(string text)
+void LL1::analysis_program(vector<Token> tokens)
 {
-    // char a;
-    // int cur = 0;
-    // stack<string> buffer;
-    // buffer.push("$");
-    // buffer.push(start);
+	cout << "-------------------------------------------------------------------------------" << endl;
+	bool accepted = true;
+	stack<string> st;
+	st.push("$");
+	st.push(start);
 
-    // cout << "-------------------------------------------------------------------------------" << endl;
+	while(!st.empty()) {
+		// If stack top same as input string char remove it
+		if(tokens[0].tokenType == st.top()) {
+			st.pop();
+			tokens.erase(tokens.begin());
+		}
+		else if(find(terminal.begin(), terminal.end(), st.top()) != terminal.end()) {
+			cout<<tokens[0].tokenType<<endl;
+			cout<<st.top()<<endl;
+			cout<<"Unmatched terminal found\n";
+			accepted = false;
+			break;
+		}
+		else {
+			string stack_top = st.top();
+			int row = distance(nonterminal.begin(), nonterminal.find(stack_top));
+			int col = distance(terminal.begin(), terminal.find(tokens[0].tokenType));
+			int prod_num = table[row][col];
 
-    // do {
-    //     x = buffer.top();
-    //     a = text[cur];
-    //     if (x == "$" && a == '$')
-    //         break;
-    //     //判断x是否为终结符号
-    //     bool judge = (find(terminal.begin(), terminal.end(), x) == terminal.end() && x != "n");
-    //     if (!judge)//是终结符号
-    //     {
-    //         if (x[0] == a) {
-    //             cout << "match" << endl;
-    //             buffer.pop();
-    //             cur++;
-    //         } else {
-    //             cout << "error" << endl;
-    //             return;
-    //         }
-    //     } else {
-    //         string temp1(1, a);
-    //         int i = number_non(x);
-    //         int j = number_ter(temp1);
-    //         if (table[i][j] != "") {
-    //             buffer.pop();
-    //             string temp2 = table[i][j];
-    //             cout << temp2 << endl;
-    //             temp2 = temp2.substr(temp2.find(">") + 1, temp2.length() - (temp2.find(">") + 1));
-    //             //逆序进栈
-    //             for (int i = temp2.size() - 1; i >= 0; i--) {
-    //                 if (temp2[i] == 'm')
-    //                     i -= 2;
-    //                 if (temp2[i] == '~')
-    //                     break;
-    //                 if (temp2[i] == '\'') {
-    //                     i--;
-    //                     string temp3;
-    //                     temp3 = temp2.substr(i, 2);
-    //                     buffer.push(temp3);
-    //                 } else {
-    //                     string temp3;
-    //                     temp3 = temp2.substr(i, 1);
-    //                     buffer.push(temp3);
-    //                 }
+			if(prod_num == -1) {
+				cout<<"No production found in parse table\n";
+				accepted = false;
+				break;
+			}
 
-    //             }
-    //         } else {
-    //             cout << "error" << endl;
-    //             return;
-    //         }
-    //     }
-    // } while (1);
-    // cout << "success" << endl;
-    // cout << "-------------------------------------------------------------------------------" << endl;
+			st.pop();
+			vector<string> rhs = deduction[prod_num].right;
+			if(rhs[0] == "~") {
+				continue;
+			}
+			for(auto ch = rhs.rbegin(); ch != rhs.rend(); ++ch) {
+				st.push(*ch);
+			}
+		}
+	}
+	if(accepted) {
+		cout<<"Input string is accepted"<<endl;;
+	}
+	else {
+		cout<<"Input string is rejected"<<endl;
+	}
+	cout << "-------------------------------------------------------------------------------" << endl;
 }

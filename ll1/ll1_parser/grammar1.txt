@@ -1,0 +1,11 @@
+P->+TP
+P->-TP
+E->TP
+Q->*FQ
+Q->/FQ
+T->FQ
+F->(E)
+F->n
+F->-F
+P->e
+Q->e

@@ -11,3 +11,37 @@
 
 ### tial
 用python实现的词法分析，ll1分析并能生产ir
+
+
+### TODO
+1. 改写成bison的语法
+```
+%{
+#include <stdio.h>
+void yyerror(const char* msg) {}
+int yylex();
+#define YYSTYPE char *
+%}
+
+%token T_WORD
+%token T_PUNC
+
+%%
+
+SENT   : SENT M_WORD T_PUNC '\n'            {printf("This is a sentence.\n");}
+       |        
+       ;
+
+M_WORD : T_WORD
+       | M_WORD T_WORD             
+       ;
+%%
+
+int main() {
+    return yyparse();
+}
+```
+
+2. 优化性能，lex和语法分析器token映射
+
+3. lexer和parser解耦

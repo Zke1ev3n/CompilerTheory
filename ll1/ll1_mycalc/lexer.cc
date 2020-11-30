@@ -1,7 +1,7 @@
 #include "lexer.h"
 #include <sstream>
 
-bool tokenize(const string & expression, list<Token> & tokens)
+bool tokenize(const string & expression, vector<Token> & tokens)
 {
 	const char * current = expression.c_str();
 	const char * const end = current + expression.length();
@@ -12,22 +12,22 @@ bool tokenize(const string & expression, list<Token> & tokens)
 		switch (*current)
 		{
 		case '+':
-			token.tokenType = TokenType::ADD;
+			token.tokenType = token_symbols[1];
 			break;
 		case '-':
-			token.tokenType = TokenType::SUB;
+			token.tokenType = token_symbols[2];
 			break;
 		case '*':
-			token.tokenType = TokenType::MUL;
+			token.tokenType = token_symbols[3];
 			break;
 		case '/':
-			token.tokenType = TokenType::DIV;
+			token.tokenType = token_symbols[4];
 			break;
 		case '(':
-			token.tokenType = TokenType::LPAREN;
+			token.tokenType = token_symbols[5];
 			break;
 		case ')':
-			token.tokenType = TokenType::RPAREN;
+			token.tokenType = token_symbols[6];
 			break;
 		default:
 			tryNumber = true;
@@ -40,7 +40,7 @@ bool tokenize(const string & expression, list<Token> & tokens)
 		else
 		{
 			std::stringstream converter;
-			token.tokenType = TokenType::NUM;
+			token.tokenType = token_symbols[0];
 			converter << current;
 			converter >> token.value.num;
 			if (converter.fail())
@@ -54,5 +54,8 @@ bool tokenize(const string & expression, list<Token> & tokens)
 		
 		tokens.push_back(token);
 	}
+	Token final_token;
+	final_token.tokenType = "$";
+	tokens.push_back(final_token);
 	return true;
 }

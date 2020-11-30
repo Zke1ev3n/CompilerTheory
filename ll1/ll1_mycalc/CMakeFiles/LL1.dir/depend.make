@@ -4,6 +4,7 @@
 CMakeFiles/LL1.dir/lexer.cc.o: lexer.cc
 CMakeFiles/LL1.dir/lexer.cc.o: lexer.h
 
+CMakeFiles/LL1.dir/ll1.cc.o: lexer.h
 CMakeFiles/LL1.dir/ll1.cc.o: ll1.cc
 CMakeFiles/LL1.dir/ll1.cc.o: ll1.h
 

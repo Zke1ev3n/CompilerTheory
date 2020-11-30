@@ -17,6 +17,8 @@
 #include <stack>
 #include <set>
 
+#include "lexer.h"
+
 using namespace std;
 
 typedef struct DEDUCTION
@@ -64,7 +66,7 @@ public:
     //生成预测分析表
     void analysis_table();
     //预测分析程序
-    void analysis_program(string text);
+    void analysis_program(vector<Token> tokens);
 };
 
 #endif //LL_1_LL_1_GRAMMER_H

@@ -1,7 +1,7 @@
 #pragma once
-#include <list>
+#include <vector>
 #include <string>
-using std::list;
+using std::vector;
 using std::string;
 
 enum class TokenType
@@ -15,6 +15,17 @@ enum class TokenType
 	RPAREN
 };
 
+const string token_symbols[] = {
+    "num",
+    "+",
+    "-",
+	"*",
+	"/",
+	"(",
+	")"
+};
+
+//如果是数字，则记录值，如果是变量，则记录变量名
 union TokenValue
 {
 	float num;
@@ -23,8 +34,8 @@ union TokenValue
 
 struct Token
 {
-	TokenType tokenType;
+	string tokenType;
 	TokenValue value;
 };
 
-bool tokenize(const string &, list<Token> &);
+bool tokenize(const string &, vector<Token> &);
