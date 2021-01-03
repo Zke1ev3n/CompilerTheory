@@ -15,45 +15,83 @@
 
 using namespace std;
 
-//产生式结构体
-typedef struct Production 
+enum SYMBOL_TYPE
 {
-    string left;
-    vector<string> right;
-} Production;
+	ST_NONE = 0,
+	ST_TERMINAL,
+	ST_NONTERMINAL,
+	ST_ACCEPT,
+};
+
+//符号
+typedef struct Symbol {
+    int index;
+    SYMBOL_TYPE type;
+    int nullable;
+    //vector<Symbol*> firstset;
+    vector<Symbol*> firstset;
+    string name;
+} Symbol;
+
+//产生式
+typedef struct Production {
+    Symbol* left;
+    vector<Symbol*> right;
+}Production;
+
+//项目
+typedef struct LR_Item {
+    Production* prod;
+    int dot;
+    vector<Symbol*> forwards;
+} LR_Item;
+
+//项目集
+typedef struct LR_State{
+    int index;
+    vector<LR_Item*> items;
+}LR_State;
 
 
-class LALR1
-{
+class LALR1{
     //产生式
-    vector<Production> productions;
+    vector<Production*> productions;
+    Production* start;
+    //符号集合
+    vector<Symbol*> symbols;
+    vector<LR_State*> states;
+
     //终结符集、非终结符集
-    set<string> nonterminal, terminal;
+    //set<string> nonterminal, terminal;
     //nullable集合
-    set<string> nullable;
+    //set<string> nullable;
     //first集、follow集
-    map<string, set<string>> first;
+    //map<string, set<string>> first;
     //起始符
-    string start;
+    //string start;
     //用于预测分析程序中
-    string x;
+    //string x;
     //预测分析表
-    int** table;
+    //int** table;
 
 public:
-    //初始化
-    void init(const string filename);
     //解析bnf文件
-    void parse_bnf(const string filename);
+    void Init(const string filename);
     //保存产生式
-    void lalr1_pushback(Production mid) { productions.push_back(mid); }
-    //生成各非终结符的first集
-    void first_set();
-    //获取first集
-    void get_first_set(string to_get_first);
-    void find_first_sets();
+    void lalr1_pushback(Production* mid) { productions.push_back(mid); }
+    Symbol* NewSymbol(const string name, SYMBOL_TYPE type);
+    Symbol* NewSymbol(const string name); 
+    Symbol* FindSymbol(const string name);
+    //求first集合
+    void FindFirstSet();
+    //计算项目集
+    void FindStates();
+    //计算闭包
+    void Closure(LR_State& lr_state);
+    int AddItem(LR_State& state, LR_Item& item);
+    bool IsSameItem(LR_Item& item1, LR_Item& item2);
     //测试输出
-    void print_test();
+    void PrintTest();
 };
 
 #endif //LL_1_LL_1_GRAMMER_H

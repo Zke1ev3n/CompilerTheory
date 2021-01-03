@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     string filename = argv[1];
-    lalr1.parse_bnf(filename);
-    lalr1.find_first_sets();
-    lalr1.print_test();
+    lalr1.Init(filename);
+    lalr1.FindFirstSet();
+    lalr1.PrintTest();
 }
