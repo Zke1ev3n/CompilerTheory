@@ -36,6 +36,8 @@ void LALR1::Init(const string filename) {
     input.open(filename);
     while (getline(input, line)) {
         Production *production = new Production();
+        //这里要为增广文法预留一条
+        production->index = productions.size() + 1;
         stringstream ss(line);
 
         getline(ss, current_name, ' ');
@@ -76,6 +78,7 @@ void LALR1::Init(const string filename) {
     Symbol *accept_symbol = NewSymbol("$", ST_TERMINAL);
     Symbol *start_symbol = productions[0]->left;
     start = new Production();
+    start->index = 0;
     start->left = NewSymbol(start_symbol->name + '\'', ST_NONTERMINAL);
     start->right.push_back(start_symbol);
     start->right.push_back(accept_symbol);
@@ -149,14 +152,65 @@ void LALR1::PrintTest() {
                 if(k == j->dot) cout << "•";
                 cout << " " << j->prod->right[k]->name;
             }
-            if(j->dot == j->prod->right.size()) cout<<"•";
+            if(j->dot == j->prod->right.size()) cout<<" •";
             cout<<" [";
             for(auto m : j->forwards) {
-                cout<<m->name;
+                cout<<" "<<m->name;
             }
-            cout<<"] "<< endl;
+            cout<<" ] "<< endl;
         }
     }
+
+    cout << "---------------------------" << endl;
+    cout << "lr action table:" << endl;
+
+    cout << "STATE 	";
+	for(int i = 0; i < symbols.size(); ++i)
+	{
+		cout << symbols[i]->name << "	";
+	}
+	cout << std::endl;
+
+    for(int i = 0; i < states.size(); ++i)
+	{
+		std::cout << i << "	";
+		for(int j = 0; j < states[i]->actions.size(); ++j)
+		{
+			int valid_action_count = 0;
+			vector<Action>& aa = states[i]->actions[j];
+			for(int m = 0; m < aa.size(); ++m)
+			{
+				assert(valid_action_count <= 1);
+				Action& act = aa[m];
+				std::stringstream ss;
+				switch(act.type)
+				{
+				case LR_ACTION_REDUCE:
+					ss << "R" << act.prod->index << "	";
+					valid_action_count++;
+					break;
+				case LR_ACTION_SHIFT:
+					ss << "S" << act.next_state << "	";
+					valid_action_count++;
+					break;
+				case LR_ACTION_GOTO:
+					ss << "G" << act.next_state << "	";
+					valid_action_count++;
+					break;
+				case LR_ACTION_ACCEPT:
+					ss << "accept" << "	";
+					valid_action_count++;
+					break;
+				case LR_ACTION_ERROR:
+					ss << "-	";
+					valid_action_count++;
+				}
+
+				cout << ss.str();
+			}
+		}
+		cout << std::endl;
+	}
 }
 
 //插入value到set中
@@ -194,6 +248,15 @@ int set_union(vector<Symbol *> &set1, vector<Symbol *> &set2) {
         }
     }
     return insert_count;
+}
+
+//符号是否在set中
+bool is_symbol_in_set(Symbol* sym, vector<Symbol*> vec) {
+    for(int i = 0; i < vec.size(); i++) {
+        if(vec[i] == sym) return true;
+    }
+
+    return false;
 }
 
 /*
@@ -318,8 +381,9 @@ void LALR1::FindStates() {
 
                 Symbol* symbol = item->prod->right[item->dot];
                 if(symbol->name == "$") continue;
-
+            
                 LR_State nstate = LRGoto(*state, symbol);
+                //这里合并了同心项目集，状态数会少于LR(1)
                 progress += AddLRState(nstate);
                 progress += AddLRGoto(*state, symbol, nstate.index);
             }
@@ -430,7 +494,7 @@ bool LALR1::IsSameItem(LR_Item &item1, LR_Item &item2) {
 int LALR1::AddLRState(LR_State& state) {
     for(auto s : states) {
         LR_State& ss = *s;
-        //是否可以合并
+        //合并同心项目集
         if(IsMergeLRState(ss, state)) {
             //state.
             if(IsSameLRState(ss, state)) return 0;
@@ -509,3 +573,270 @@ int LALR1::AddLRGoto(LR_State& state, Symbol* sym, int index) {
 
     return index;
 }
+
+
+/*
+R <- {}
+for T中的每一个状态I
+    for I中的每一个项(A->a. , z)
+        R <= R U {(I,z,A->a)}
+
+对于每一条边I-X->J, 若X为终结符，则在位置(I,X)中放移进J(sJ)；
+若X为非终结符，则将转换J(gJ)放在位置(I,X)中。
+对于包含项S1->S.$的每个状态I,我们再位置(I,$)中放置接受(a).
+最后，对于包含项A->y.(尾部有圆点的产生式n)的状态，
+对每一个单词Y, 放置规约n(rn)于(I,Y)中。
+*/
+void LALR1::MakeLALR1Table() {
+
+    for(int i = 0; i< states.size(); i++) {
+        LR_State* state = states[i];
+        //行数，symbol的个数
+        state->actions.resize(symbols.size());
+
+        //goto & shift action
+        for(map<Symbol*, int>::iterator it = state->goto_map.begin(); it != state->goto_map.end(); it++) {
+            Symbol* sym = it->first;
+
+            Action act;
+            act.next_state = it->second;
+            act.prod = nullptr;
+            act.lookahead = sym;
+
+            if(sym->type == ST_TERMINAL) {
+                act.type = LR_ACTION_SHIFT;
+            }else if(sym->type == ST_NONTERMINAL) {
+                act.type = LR_ACTION_GOTO;
+            }
+
+            state->actions[sym->index].push_back(act);
+        }
+
+        for(int j = 0; j < state->items.size(); j++) {
+            LR_Item* item = state->items[j];
+            if(item->dot != item->prod->right.size()) continue;
+
+            for(int k = 0; k < state->actions.size(); k++) {
+                if(symbols[k]->type != ST_TERMINAL) continue;
+                //FOR LALR
+                if(!is_symbol_in_set(symbols[k], item->forwards)) continue;
+                //FOR SLR
+                //if(!is_symbol_in_set[symbols[j], item->prod->left->followset) continue;
+
+                Action act;
+                act.type = LR_ACTION_REDUCE;
+                act.next_state = 0;
+                act.prod = item->prod;
+                act.lookahead = symbols[k];
+
+                state->actions[k].push_back(act);
+            }
+        }
+
+       //accept action
+       for(int k = 0; k < state->items.size(); k++) {
+           LR_Item* item = state->items[k];
+           if(item->dot != item->prod->right.size() - 1) continue;
+
+           if(item->prod->right[item->dot]->name == "$") {
+               Action act;
+               act.prod = item->prod;
+               act.type = LR_ACTION_ACCEPT;
+               act.next_state = 0;
+               act.lookahead = item->prod->right[item->dot];
+
+               state->actions[item->prod->right[item->dot]->index].push_back(act);
+           }
+       }
+    }
+
+   for(int i = 0; i < states.size(); i++) {
+
+       LR_State* state = states[i];
+       for(int j = 0; j < state->actions.size(); j++) {
+           vector<Action>& aa = state->actions[j];
+           if(aa.size() == 0) {
+               Action act;
+               act.prod = nullptr;
+               act.type = LR_ACTION_ERROR;
+               act.next_state = 0;
+               act.lookahead = nullptr;
+
+               aa.push_back(act);
+           }
+       }
+   }
+
+    //TODO 暂时不支持冲突处理，需要针对语法特殊处理
+    //resolve conflict
+//    int conflict = 0;
+//    for(int i = 0; i < states.size(); i++) {
+//        LR_State* state = states[i];
+//        for(int j = 0; j < state->actions.size(); j++) {
+//            vector<Action>& aa = state->actions[j];
+//            if(aa.size() < 2) continue;
+
+//            for(int k = 1; k < aa.size(); k++) {
+//                conflict += ResolveConflict(aa[k-1], aa[k]);
+//            }
+//        }
+//    }
+
+//    cout << "conflict: " << conflict << endl;
+
+}
+
+int LALR1::ResolveConflict(Action& a1, Action& a2) {
+
+    int error = 0;
+    assert(a1.lookahead == a2.lookahead);
+
+    //两个都是移进
+    if(a1.type == LR_ACTION_SHIFT && a2.type == LR_ACTION_SHIFT) {
+        a2.type = LR_ACTION_SSCONFLICT;
+        error++;
+    }
+
+    if(a1.type == LR_ACTION_SHIFT && a2.type == LR_ACTION_REDUCE) {
+        Symbol* s1 = a1.lookahead;
+        //Symbol* s2 = a2->pr
+
+    }
+
+    return error;
+
+    /*
+    int xbytes::resolve_conflict(action& x, action& y)
+{
+	int error = 0;
+	assert(x.lookahead == y.lookahead);
+
+	if(x.type == LR_ACTION_SHIFT && y.type == LR_ACTION_SHIFT)
+	{
+		y.type = LR_ACTION_SSCONFLICT;
+		error++;
+	}
+
+	if(x.type == LR_ACTION_SHIFT && y.type == LR_ACTION_REDUCE)
+	{
+		symbol* xs = x.lookahead;
+		symbol* ys = y.r->precedence_symbol;
+
+		if(ys == NULL || xs->precedence < 0 || ys->precedence < 0)
+		{
+			//Not enough precedence information
+			y.type = LR_ACTION_SRCONFLICT;
+			error++;
+		}
+		else if(xs->precedence > ys->precedence)
+		{
+			y.type = LR_ACTION_RDRESOLVED;
+		}
+		else if(xs->precedence < ys->precedence)
+		{
+			x.type = LR_ACTION_SHRESOLVED;
+		}
+		else if(xs->precedence == ys->precedence && xs->associativity == AT_RIGHT)//Use operator
+		{
+			y.type = LR_ACTION_RDRESOLVED;//associativity
+		}
+		else if(xs->precedence == ys->precedence && xs->associativity == AT_LEFT)//to break tie
+		{
+			x.type = LR_ACTION_SHRESOLVED;
+		}
+		else
+		{
+			assert(xs->precedence == ys->precedence && xs->associativity == AT_NONE);
+			x.type = LR_ACTION_ERROR;
+		}
+	}
+	else if(x.type = LR_ACTION_REDUCE && y.type == LR_ACTION_REDUCE)
+	{
+		symbol* xs = x.r->precedence_symbol;
+		symbol* ys = y.r->precedence_symbol;
+
+		if(xs == NULL || ys == NULL || xs->precedence < 0 || 
+			ys->precedence < 0 || xs->precedence == ys->precedence)
+		{
+			y.type = LR_ACTION_RRCONFLICT;
+			error++;
+		}
+		else if(xs->precedence > ys->precedence)
+		{
+			y.type = LR_ACTION_RDRESOLVED;
+		}
+		else if(xs->precedence < ys->precedence)
+		{
+			x.type = LR_ACTION_RDRESOLVED;
+		}
+	}
+	else
+	{
+		assert(
+			x.type == LR_ACTION_SHRESOLVED ||
+			x.type == LR_ACTION_RDRESOLVED ||
+			x.type == LR_ACTION_SSCONFLICT ||
+			x.type == LR_ACTION_SRCONFLICT ||
+			x.type == LR_ACTION_RRCONFLICT ||
+			y.type == LR_ACTION_SHRESOLVED ||
+			y.type == LR_ACTION_RDRESOLVED ||
+			y.type == LR_ACTION_SSCONFLICT ||
+			y.type == LR_ACTION_SRCONFLICT ||
+			y.type == LR_ACTION_RRCONFLICT
+			);
+	}
+
+	return error;
+}
+*/
+
+}
+
+//处理优先级
+void LALR1::FindSymbolPrecedence() {
+
+
+}
+/*
+void xbytes::find_symbol_precedence()
+{
+	//make symbol's precedence & associativity
+	for(int i = 0; i < assoc_precs.size(); ++i)
+	{
+		int ass = assoc_precs[i].associativity;
+		string_array& sa = assoc_precs[i].symbol_names;
+		for(int m = 0; m < sa.size(); ++m)
+		{
+			symbol* s = find_symbol(sa[m]);
+			if(s)
+			{
+				s->associativity = ass;
+				s->precedence = i;
+			}
+		}
+	}	
+}
+void xbytes::find_rule_precedence()
+{
+
+
+	//make rule's precedence
+	for(int i = 0; i < rules.size(); ++i)
+	{
+		rule* r = rules[i];
+		if(r->precedence_symbol != NULL) continue;
+
+		for(int m = 0; m < r->rights.size() && r->precedence_symbol == NULL; ++m)
+		{
+			symbol* s = r->rights[m];
+			if(s->type != ST_TERMINAL) continue;
+			
+			if(s->precedence >= 0)
+			{
+				r->precedence_symbol = s;
+				break;
+			}
+		}
+	}
+}
+*/

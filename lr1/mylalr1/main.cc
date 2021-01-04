@@ -5,6 +5,8 @@
 
 using namespace std;
 
+//对比：http://jsmachines.sourceforge.net/machines/lalr1.html
+//对比：https://mikedevice.github.io/first-follow/
 int main(int argc, char* argv[])
 {
     ifstream input;
@@ -19,5 +21,6 @@ int main(int argc, char* argv[])
     lalr1.Init(filename);
     lalr1.FindFirstSet();
     lalr1.FindStates();
+    lalr1.MakeLALR1Table();
     lalr1.PrintTest();
 }

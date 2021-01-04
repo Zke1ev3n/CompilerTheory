@@ -33,8 +33,22 @@ typedef struct Symbol {
     string name;
 } Symbol;
 
+enum ASSOCIATIVITY_TYPE
+{
+	AT_NONE = 0,
+	AT_LEFT,
+	AT_RIGHT
+};
+
+typedef struct AssocPrec
+{
+	int associativity;
+	vector<string> symbol_names;
+} AssocPrec;
+
 //产生式
 typedef struct Production {
+    int index;
     Symbol* left;
     vector<Symbol*> right;
 }Production;
@@ -46,12 +60,37 @@ typedef struct LR_Item {
     vector<Symbol*> forwards;
 } LR_Item;
 
+enum LR_ACTION
+{
+	LR_ACTION_GOTO = 1,
+	LR_ACTION_SHIFT,
+	LR_ACTION_REDUCE,
+	LR_ACTION_ACCEPT,
+	LR_ACTION_ERROR,
+	LR_ACTION_SSCONFLICT,
+	LR_ACTION_SRCONFLICT,
+	LR_ACTION_RRCONFLICT,
+	LR_ACTION_RDRESOLVED,
+	LR_ACTION_SHRESOLVED,
+};
+
+typedef struct Action{
+	int type;
+	int next_state;
+
+	Production* prod;//规约动作的产生式
+
+	Symbol* lookahead;
+}Action;
+
 //项目集
 typedef struct LR_State{
     int index;
     vector<LR_Item*> items;
     //跳转表
     map<Symbol*, int> goto_map;
+    //TODO 优化？
+    vector<vector<Action>> actions;
 }LR_State;
 
 
@@ -63,18 +102,8 @@ class LALR1{
     vector<Symbol*> symbols;
     vector<LR_State*> states;
 
-    //终结符集、非终结符集
-    //set<string> nonterminal, terminal;
-    //nullable集合
-    //set<string> nullable;
-    //first集、follow集
-    //map<string, set<string>> first;
-    //起始符
-    //string start;
-    //用于预测分析程序中
-    //string x;
-    //预测分析表
-    //int** table;
+    //符号的优先级
+    vector<AssocPrec> assoc_precs;
 
 public:
     //解析bnf文件
@@ -84,6 +113,7 @@ public:
     Symbol* NewSymbol(const string name, SYMBOL_TYPE type);
     Symbol* NewSymbol(const string name); 
     Symbol* FindSymbol(const string name);
+    void FindSymbolPrecedence();
     //求first集合
     void FindFirstSet();
     //计算项目集
@@ -98,6 +128,8 @@ public:
     int MergeLRState(LR_State& s1, LR_State& s2);
     LR_State LRGoto(LR_State& state, Symbol* sym);
     int AddLRGoto(LR_State& state, Symbol* sym, int index);
+    void MakeLALR1Table();
+    int ResolveConflict(Action& a1, Action& a2);
     //测试输出
     void PrintTest();
 };

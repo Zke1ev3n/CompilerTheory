@@ -1,0 +1,69 @@
+program -> block '.'
+
+block -> const-decl var-decl proc-decl statement
+
+const-decl -> 'const' const-assignment-list ';' 
+           | '~'
+           ;
+
+const-assignment-list -> ident '=' number
+            | const-assignment-list ',' ident '=' number
+            ;
+
+var-decl -> 'var' ident-list ';' 
+            | '~'
+            ;
+
+ident-list -> ident 
+            | ident-list ',' ident
+            ;
+
+proc-decl -> proc-decl 'procedure' ident ';' block ';' 
+            | '~'
+            ;
+
+statement -> ident ':=' expression
+            | 'call' ident
+            | 'begin' statement-list 'end'
+            | 'if' condition 'then' statement
+            | 'while' condition 'do' statement
+            | '~'
+            ;
+
+statement-list -> statement 
+            | statement-list ';' statement
+            ;
+
+condition -> 'odd' expression 
+            | expression relation expression
+            ;
+
+relation -> '=' 
+        | '<>' 
+        | '<' 
+        | '>' 
+        | '<=' 
+        | '>='
+        ;
+
+expression -> term 
+            | adding-operator term
+            | expression adding-operator term
+            ;
+
+adding-operator -> '+' 
+                | '-'
+                ;
+
+term -> factor 
+    | term multiplying-operator factor
+    ;
+
+multiplying-operator -> '*' 
+                    | '/'
+                    ;
+
+factor -> ident 
+        | number 
+        | '(' expression ')'
+        ;
