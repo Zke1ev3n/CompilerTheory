@@ -50,6 +50,8 @@ typedef struct LR_Item {
 typedef struct LR_State{
     int index;
     vector<LR_Item*> items;
+    //跳转表
+    map<Symbol*, int> goto_map;
 }LR_State;
 
 
@@ -94,6 +96,8 @@ public:
     bool IsMergeLRState(LR_State& s1, LR_State& s2);
     bool IsSameLRState(LR_State& s1, LR_State& s2);
     int MergeLRState(LR_State& s1, LR_State& s2);
+    LR_State LRGoto(LR_State& state, Symbol* sym);
+    int AddLRGoto(LR_State& state, Symbol* sym, int index);
     //测试输出
     void PrintTest();
 };

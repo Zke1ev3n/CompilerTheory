@@ -149,6 +149,7 @@ void LALR1::PrintTest() {
                 if(k == j->dot) cout << "•";
                 cout << " " << j->prod->right[k]->name;
             }
+            if(j->dot == j->prod->right.size()) cout<<"•";
             cout<<" [";
             for(auto m : j->forwards) {
                 cout<<m->name;
@@ -195,6 +196,31 @@ int set_union(vector<Symbol *> &set1, vector<Symbol *> &set2) {
     return insert_count;
 }
 
+/*
+摘录自虎书
+FIRST、FOLLOW、nullable计算算法：
+
+将所有FIRST,FOLLOW,nullable设置为空
+for 每一个终结符Z
+	FIRST[Z] = {Z}
+
+repeat
+	for 每个产生式 X->Y1 Y2 ... Yk
+		for 每个i从1到k 每个j从i+1到k
+			if 所有Yi都可为空的 then
+				nullable[X] = true
+			if Y1 ... Yi-1都可为空的 then
+				FIRST[X] = FIRST[X] U FIRST[Yi]
+			if Yi+1 ... Yk 都可为空的 then
+				FOLLOW[Yi] = FOLLOW[Yi] U FOLLOW[X]
+			if Yi+1 .. Yj-1 都可为空的 then
+				FOLLOW[Yi] = FOLLOW[Yi] U FIRST[Yj]
+			if Yi+1是终结符并且Yi是非终结符
+				FOLLOW[Yi] = FOLLOW[Yi] U Yi
+			if Yi+1是非终结符并且Yi也是非终结符
+				FOLLOW[Yi] = FOLLOW[Yi] U FIRST[Yi+1]
+until FIRST,FOLLOW,nullable都没有变化
+*/
 void LALR1::FindFirstSet() {
     int i;
     int progress;
@@ -272,6 +298,7 @@ void LALR1::FindStates() {
     LR_Item *item = new LR_Item();
     item->prod = start;
     item->dot = 0;
+    //这里可以不用加$
     //item->forwards.push_back()
 
     start_state.items.push_back(item);
@@ -280,6 +307,24 @@ void LALR1::FindStates() {
 
     AddLRState(start_state);
 
+    int progress = 1;
+    do{
+        progress = 0;
+        for(int i = 0; i < states.size(); i++) {
+            LR_State* state = states[i];
+            for(int j = 0; j < state->items.size(); j++) {
+                LR_Item* item = state->items[j];
+                if(item->dot >= item->prod->right.size()) continue;
+
+                Symbol* symbol = item->prod->right[item->dot];
+                if(symbol->name == "$") continue;
+
+                LR_State nstate = LRGoto(*state, symbol);
+                progress += AddLRState(nstate);
+                progress += AddLRGoto(*state, symbol, nstate.index);
+            }
+        }
+    }while(progress);
 }
 
 /*
@@ -428,4 +473,39 @@ int LALR1::MergeLRState(LR_State& s1, LR_State& s2) {
         count += set_union(i1->forwards, i2->forwards);
     }
     return count;
+}
+
+/*
+Goto(I,X) =
+    J <- {}
+    for I中的任意项(A -> a.Xb, z)
+        将(A->aX.b, z)加入到J中
+    return Closure(J)
+*/    
+LR_State LALR1::LRGoto(LR_State& state, Symbol* sym) {
+    LR_State next_state;
+    for(int i = 0; i < state.items.size(); i++) {
+        LR_Item* item = state.items[i];
+        if(item->dot >= item->prod->right.size()) continue;
+
+        if(item->prod->right[item->dot] == sym) {
+            LR_Item tt;
+            tt.prod = item->prod;
+            tt.dot = item->dot + 1;
+            tt.forwards = item->forwards;
+            AddItem(next_state, tt);
+        }
+    }
+
+    Closure(next_state);
+
+    return next_state;
+}
+
+int LALR1::AddLRGoto(LR_State& state, Symbol* sym, int index) {
+    if(state.goto_map.count(sym) > 0) return 0;
+
+    state.goto_map[sym] = index;
+
+    return index;
 }
