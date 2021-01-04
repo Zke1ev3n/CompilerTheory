@@ -280,8 +280,6 @@ void LALR1::FindStates() {
 
     AddLRState(start_state);
 
-
-    /******/
 }
 
 /*
@@ -314,24 +312,40 @@ void LALR1::Closure(LR_State &lr_state) {
                 tt.prod = prod;
                 tt.dot = 0;
                 //forwards中的都是终结符
-                //TODO 弄清楚
-                if (item->forwards.size() != 0) {
-                    for (int m = 0; m < item->forwards.size(); m++) {
-                        for (int n = 0; n < item->forwards[m]->firstset.size(); n++) {
-                            tt.forwards.push_back(item->forwards[m]->firstset[n]);
-                            progress += AddItem(lr_state, tt);
-                            tt.forwards.clear();
-                        }
-                    }
-                }
+                //TODO 这种逻辑导致forwards中的集合比较大
+                // if (item->forwards.size() != 0) {
+                //     for (int m = 0; m < item->forwards.size(); m++) {
+                //         for (int n = 0; n < item->forwards[m]->firstset.size(); n++) {
+                //             tt.forwards.push_back(item->forwards[m]->firstset[n]);
+                //             progress += AddItem(lr_state, tt);
+                //             tt.forwards.clear();
+                //         }
+                //     }
+                // }
+                // if (item->dot < item->prod->right.size() - 1) {
+                //     for (int m = 0; m < item->prod->right[item->dot + 1]->firstset.size(); m++) {
+                //         tt.forwards.push_back(item->prod->right[item->dot + 1]->firstset[m]);
+                //         progress += AddItem(lr_state, tt);
+                //         tt.forwards.clear();
+                //     }
+                // }
                 if (item->dot < item->prod->right.size() - 1) {
                     for (int m = 0; m < item->prod->right[item->dot + 1]->firstset.size(); m++) {
                         tt.forwards.push_back(item->prod->right[item->dot + 1]->firstset[m]);
-                        progress += AddItem(lr_state, tt);
-                        tt.forwards.clear();
+                    }
+                    if (item->prod->right[item->dot + 1]->nullable) {
+                        //forwards都是终结符
+                        for (int n = 0; n < item->forwards.size(); n++) {
+                            tt.forwards.push_back(item->forwards[n]->firstset[0]);
+                        }
+                    }
+                }else{
+                    //dot在最后
+                    for (int n = 0; n < item->forwards.size(); n++) {
+                            tt.forwards.push_back(item->forwards[n]->firstset[0]);
                     }
                 }
-                //progress += AddItem(lr_state, tt);
+                progress += AddItem(lr_state, tt);
             }
         }
     } while (progress);
