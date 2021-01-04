@@ -90,6 +90,10 @@ public:
     void Closure(LR_State& lr_state);
     int AddItem(LR_State& state, LR_Item& item);
     bool IsSameItem(LR_Item& item1, LR_Item& item2);
+    int AddLRState(LR_State& state);
+    bool IsMergeLRState(LR_State& s1, LR_State& s2);
+    bool IsSameLRState(LR_State& s1, LR_State& s2);
+    int MergeLRState(LR_State& s1, LR_State& s2);
     //测试输出
     void PrintTest();
 };

@@ -18,5 +18,6 @@ int main(int argc, char* argv[])
     string filename = argv[1];
     lalr1.Init(filename);
     lalr1.FindFirstSet();
+    lalr1.FindStates();
     lalr1.PrintTest();
 }
