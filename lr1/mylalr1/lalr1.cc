@@ -86,6 +86,8 @@ void LALR1::Init(const string filename) {
     productions.insert(productions.begin(), start);
     //插入结束符号
     // terminal.insert("$");
+
+    //TODO 优化symbol顺序
 }
 
 void LALR1::PrintTest() {
@@ -211,6 +213,16 @@ void LALR1::PrintTest() {
 		}
 		cout << std::endl;
 	}
+
+    cout << "---------------------------" << endl;
+    cout << "lr output table:" << endl;
+    for(int i = 0; i < output_table.size(); i++) {
+        for(int j = 0; j < output_table[i].size(); j++) {
+            cout << "(" <<output_table[i][j].first << "," << output_table[i][j].second << ")    ";
+        }
+        cout << endl;
+    }
+
 }
 
 //插入value到set中
@@ -496,7 +508,7 @@ int LALR1::AddLRState(LR_State& state) {
         LR_State& ss = *s;
         //合并同心项目集
         if(IsMergeLRState(ss, state)) {
-            //state.
+            state.index = ss.index;
             if(IsSameLRState(ss, state)) return 0;
             return MergeLRState(ss, state);
         }
@@ -684,6 +696,65 @@ void LALR1::MakeLALR1Table() {
 
 //    cout << "conflict: " << conflict << endl;
 
+}
+
+
+void LALR1::MakeOutputTable() {
+
+    for(int i = 0; i < symbols.size(); i++) {
+        symbol_map[symbols[i]->name] = i;
+    }
+
+    //行数为状态个数
+    output_table.resize(states.size());
+
+    //列数为符号个数
+    for(int i = 0; i < states.size(); i++) {
+        output_table[i].resize(symbols.size());
+    }
+
+    for(int i = 0; i < states.size(); ++i)
+	{
+		for(int j = 0; j < states[i]->actions.size(); ++j)
+		{
+			int valid_action_count = 0;
+			vector<Action>& aa = states[i]->actions[j];
+			for(int m = 0; m < aa.size(); ++m)
+			{
+				assert(valid_action_count <= 1);
+				Action& act = aa[m];
+				switch(act.type)
+				{
+				case LR_ACTION_REDUCE:
+					//ss << "R" << act.prod->index << "	";
+                    output_table[i][j] = make_pair(LR_ACTION_REDUCE, act.prod->index);
+                    reduce_map[act.prod->index] = make_pair(act.prod->left->index, act.prod->right.size());
+					valid_action_count++;
+					break;
+				case LR_ACTION_SHIFT:
+					//ss << "S" << act.next_state << "	";
+                    output_table[i][j] = make_pair(LR_ACTION_SHIFT, act.next_state);
+					valid_action_count++;
+					break;
+				case LR_ACTION_GOTO:
+					//ss << "G" << act.next_state << "	";
+                    output_table[i][j] = make_pair(LR_ACTION_GOTO, act.next_state);
+					valid_action_count++;
+					break;
+				case LR_ACTION_ACCEPT:
+					//ss << "accept" << "	";
+                    output_table[i][j] = make_pair(LR_ACTION_ACCEPT, 0);
+					valid_action_count++;
+					break;
+				case LR_ACTION_ERROR:
+					//ss << "-	";
+                    output_table[i][j] = make_pair(LR_ACTION_ERROR, 0);
+					valid_action_count++;
+				}
+
+			}
+		}
+	}
 }
 
 int LALR1::ResolveConflict(Action& a1, Action& a2) {

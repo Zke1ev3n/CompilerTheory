@@ -6,10 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.cc
-lalr1.h
-/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.h
-
 /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.h
 iostream
 -
@@ -33,4 +29,38 @@ stack
 -
 set
 -
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lexer.h
+vector
+-
+string
+-
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/main.cc
+iostream
+-
+fstream
+-
+sstream
+-
+lexer.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lexer.h
+lalr1.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.h
+parser.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/parser.h
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/parser.cc
+parser.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/parser.h
+
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/parser.h
+stack
+-
+vector
+-
+lexer.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lexer.h
+lalr1.h
+/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.h
 

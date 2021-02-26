@@ -1,525 +1,146 @@
 ---------------------------
 expresion:
-0. program' -> program $ 
-1. program -> block . 
-2. block -> const-decl var-decl proc-decl statement 
-3. const-decl -> const const-assignment-list ; 
-4. const-decl -> ~ 
-5. const-assignment-list -> ident = number 
-6. const-assignment-list -> const-assignment-list , ident = number 
-7. var-decl -> var ident-list ; 
-8. var-decl -> ~ 
-9. ident-list -> ident 
-10. ident-list -> ident-list , ident 
-11. proc-decl -> proc-decl procedure ident ; block ; 
-12. proc-decl -> ~ 
-13. statement -> ident := expression 
-14. statement -> call ident 
-15. statement -> begin statement-list end 
-16. statement -> if condition then statement 
-17. statement -> while condition do statement 
-18. statement -> ~ 
-19. statement-list -> statement 
-20. statement-list -> statement-list ; statement 
-21. condition -> odd expression 
-22. condition -> expression relation expression 
-23. relation -> = 
-24. relation -> <> 
-25. relation -> < 
-26. relation -> > 
-27. relation -> <= 
-28. relation -> >= 
-29. expression -> term 
-30. expression -> adding-operator term 
-31. expression -> expression adding-operator term 
-32. adding-operator -> + 
-33. adding-operator -> - 
-34. term -> factor 
-35. term -> term multiplying-operator factor 
-36. multiplying-operator -> * 
-37. multiplying-operator -> / 
-38. factor -> ident 
-39. factor -> number 
-40. factor -> ( expression ) 
+0. expr' -> expr $ 
+1. expr -> expr + term 
+2. expr -> expr - term 
+3. expr -> term 
+4. term -> term * factor 
+5. term -> term / factor 
+6. term -> factor 
+7. factor -> ( expr ) 
+8. factor -> num 
+9. factor -> - factor 
 ---------------------------
 nonterminal set:
-program
-block
-const-decl
-var-decl
-proc-decl
-statement
-const-assignment-list
-ident
-number
-ident-list
-expression
-statement-list
-condition
-relation
+expr
 term
-adding-operator
 factor
-multiplying-operator
-program'
+expr'
 ---------------------------
 terminal set:
-.
-const
-;
-~
-=
-,
-var
-procedure
-:=
-call
-begin
-end
-if
-then
-while
-do
-odd
-<>
-<
->
-<=
->=
 +
 -
 *
 /
 (
 )
+num
 $
 ---------------------------
 nullable set:
-block
-const-decl
-var-decl
-proc-decl
-statement
-statement-list
 
 ---------------------------
 first set:
-program : . const ~ var procedure call begin if while 
-block : const ~ var procedure call begin if while 
-const-decl : const ~ 
-var-decl : var ~ 
-proc-decl : procedure ~ 
-statement : call begin if while ~ 
-expression : + - ( 
-statement-list : call begin if while ~ ; 
-condition : odd + - ( 
-relation : = <> < > <= >= 
-term : ( 
-adding-operator : + - 
-factor : ( 
-multiplying-operator : * / 
-program' : . const ~ var procedure call begin if while 
+expr : ( num - 
+term : ( num - 
+factor : ( num - 
+expr' : ( num - 
 
 ---------------------------
 lr state set:
 state0 : 
-program' -> • program $ [ ] 
-program -> • block . [ $ ] 
-block -> • const-decl var-decl proc-decl statement [ . ] 
-const-decl -> • const const-assignment-list ; [ var ~ . ] 
-const-decl -> • ~ [ var ~ . ] 
+expr' -> • expr $ [ ] 
+expr -> • expr + term [ $ + - ] 
+expr -> • expr - term [ $ + - ] 
+expr -> • term [ $ + - ] 
+term -> • term * factor [ $ + - * / ] 
+term -> • term / factor [ $ + - * / ] 
+term -> • factor [ $ + - * / ] 
+factor -> • ( expr ) [ $ + - * / ] 
+factor -> • num [ $ + - * / ] 
+factor -> • - factor [ $ + - * / ] 
 state1 : 
-program' ->  program• $ [ ] 
+expr' ->  expr• $ [ ] 
+expr ->  expr• + term [ $ + - ] 
+expr ->  expr• - term [ $ + - ] 
 state2 : 
-program ->  block• . [ $ ] 
+expr ->  term • [ $ + - ) ] 
+term ->  term• * factor [ $ + - * / ) ] 
+term ->  term• / factor [ $ + - * / ) ] 
 state3 : 
-block ->  const-decl• var-decl proc-decl statement [ . ; ] 
-var-decl -> • var ident-list ; [ procedure ~ . ; ] 
-var-decl -> • ~ [ procedure ~ . ; ] 
+term ->  factor • [ $ + - * / ) ] 
 state4 : 
-const-decl ->  const• const-assignment-list ; [ var ~ . ; ] 
-const-assignment-list -> • ident = number [ ; , ] 
-const-assignment-list -> • const-assignment-list , ident = number [ ; , ] 
+factor ->  (• expr ) [ $ + - * / ) ] 
+expr -> • expr + term [ ) + - ] 
+expr -> • expr - term [ ) + - ] 
+expr -> • term [ ) + - ] 
+term -> • term * factor [ ) + - * / ] 
+term -> • term / factor [ ) + - * / ] 
+term -> • factor [ ) + - * / ] 
+factor -> • ( expr ) [ ) + - * / ] 
+factor -> • num [ ) + - * / ] 
+factor -> • - factor [ ) + - * / ] 
 state5 : 
-const-decl ->  ~ • [ var ~ . ; ] 
+factor ->  num • [ $ + - * / ) ] 
 state6 : 
-program ->  block . • [ $ ] 
+factor ->  -• factor [ $ + - * / ) ] 
+factor -> • ( expr ) [ $ + - * / ) ] 
+factor -> • num [ $ + - * / ) ] 
+factor -> • - factor [ $ + - * / ) ] 
 state7 : 
-block ->  const-decl var-decl• proc-decl statement [ . ; ] 
-proc-decl -> • proc-decl procedure ident ; block ; [ call begin if while ~ . procedure ; ] 
-proc-decl -> • ~ [ call begin if while ~ . procedure ; ] 
+expr ->  expr +• term [ $ + - ) ] 
+term -> • term * factor [ $ + - * / ) ] 
+term -> • term / factor [ $ + - * / ) ] 
+term -> • factor [ $ + - * / ) ] 
+factor -> • ( expr ) [ $ + - * / ) ] 
+factor -> • num [ $ + - * / ) ] 
+factor -> • - factor [ $ + - * / ) ] 
 state8 : 
-var-decl ->  var• ident-list ; [ procedure ~ . ; ] 
-ident-list -> • ident [ ; , ] 
-ident-list -> • ident-list , ident [ ; , ] 
+expr ->  expr -• term [ $ + - ) ] 
+term -> • term * factor [ $ + - * / ) ] 
+term -> • term / factor [ $ + - * / ) ] 
+term -> • factor [ $ + - * / ) ] 
+factor -> • ( expr ) [ $ + - * / ) ] 
+factor -> • num [ $ + - * / ) ] 
+factor -> • - factor [ $ + - * / ) ] 
 state9 : 
-var-decl ->  ~ • [ procedure ~ . ; ] 
+term ->  term *• factor [ $ + - * / ) ] 
+factor -> • ( expr ) [ $ + - * / ) ] 
+factor -> • num [ $ + - * / ) ] 
+factor -> • - factor [ $ + - * / ) ] 
 state10 : 
-const-decl ->  const const-assignment-list• ; [ var ~ . ; ] 
-const-assignment-list ->  const-assignment-list• , ident = number [ ; , ] 
+term ->  term /• factor [ $ + - * / ) ] 
+factor -> • ( expr ) [ $ + - * / ) ] 
+factor -> • num [ $ + - * / ) ] 
+factor -> • - factor [ $ + - * / ) ] 
 state11 : 
-const-assignment-list ->  ident• = number [ ; , ] 
+factor ->  ( expr• ) [ $ + - * / ) ] 
+expr ->  expr• + term [ ) + - ] 
+expr ->  expr• - term [ ) + - ] 
 state12 : 
-block ->  const-decl var-decl proc-decl• statement [ . ; ] 
-proc-decl ->  proc-decl• procedure ident ; block ; [ call begin if while ~ . procedure ; ] 
-statement -> • ident := expression [ . ; ] 
-statement -> • call ident [ . ; ] 
-statement -> • begin statement-list end [ . ; ] 
-statement -> • if condition then statement [ . ; ] 
-statement -> • while condition do statement [ . ; ] 
-statement -> • ~ [ . ; ] 
+factor ->  - factor • [ $ + - * / ) ] 
 state13 : 
-proc-decl ->  ~ • [ call begin if while ~ . procedure ; ] 
+expr ->  expr + term • [ $ + - ) ] 
+term ->  term• * factor [ $ + - * / ) ] 
+term ->  term• / factor [ $ + - * / ) ] 
 state14 : 
-var-decl ->  var ident-list• ; [ procedure ~ . ; ] 
-ident-list ->  ident-list• , ident [ ; , ] 
+expr ->  expr - term • [ $ + - ) ] 
+term ->  term• * factor [ $ + - * / ) ] 
+term ->  term• / factor [ $ + - * / ) ] 
 state15 : 
-ident-list ->  ident • [ ; , ] 
+term ->  term * factor • [ $ + - * / ) ] 
 state16 : 
-const-decl ->  const const-assignment-list ; • [ var ~ . ; ] 
+term ->  term / factor • [ $ + - * / ) ] 
 state17 : 
-const-assignment-list ->  const-assignment-list ,• ident = number [ ; , ] 
-state18 : 
-const-assignment-list ->  ident =• number [ ; , ] 
-state19 : 
-block ->  const-decl var-decl proc-decl statement • [ . ; ] 
-state20 : 
-proc-decl ->  proc-decl procedure• ident ; block ; [ call begin if while ~ . procedure ; ] 
-state21 : 
-statement ->  ident• := expression [ . end ; ] 
-state22 : 
-statement ->  call• ident [ . end ; ] 
-state23 : 
-statement ->  begin• statement-list end [ . end ; ] 
-statement-list -> • statement [ end ; ] 
-statement-list -> • statement-list ; statement [ end ; ] 
-statement -> • ident := expression [ end ; ] 
-statement -> • call ident [ end ; ] 
-statement -> • begin statement-list end [ end ; ] 
-statement -> • if condition then statement [ end ; ] 
-statement -> • while condition do statement [ end ; ] 
-statement -> • ~ [ end ; ] 
-state24 : 
-statement ->  if• condition then statement [ . end ; ] 
-condition -> • odd expression [ then ] 
-condition -> • expression relation expression [ then ] 
-expression -> • term [ = <> < > <= >= + - ] 
-expression -> • adding-operator term [ = <> < > <= >= + - ] 
-expression -> • expression adding-operator term [ = <> < > <= >= + - ] 
-term -> • factor [ = <> < > <= >= * / + - ] 
-term -> • term multiplying-operator factor [ = <> < > <= >= * / + - ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-factor -> • ident [ = <> < > <= >= * / + - ] 
-factor -> • number [ = <> < > <= >= * / + - ] 
-factor -> • ( expression ) [ = <> < > <= >= * / + - ] 
-state25 : 
-statement ->  while• condition do statement [ . end ; ] 
-condition -> • odd expression [ do ] 
-condition -> • expression relation expression [ do ] 
-expression -> • term [ = <> < > <= >= + - ] 
-expression -> • adding-operator term [ = <> < > <= >= + - ] 
-expression -> • expression adding-operator term [ = <> < > <= >= + - ] 
-term -> • factor [ = <> < > <= >= * / + - ] 
-term -> • term multiplying-operator factor [ = <> < > <= >= * / + - ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-factor -> • ident [ = <> < > <= >= * / + - ] 
-factor -> • number [ = <> < > <= >= * / + - ] 
-factor -> • ( expression ) [ = <> < > <= >= * / + - ] 
-state26 : 
-statement ->  ~ • [ . end ; ] 
-state27 : 
-var-decl ->  var ident-list ; • [ procedure ~ . ; ] 
-state28 : 
-ident-list ->  ident-list ,• ident [ ; , ] 
-state29 : 
-const-assignment-list ->  const-assignment-list , ident• = number [ ; , ] 
-state30 : 
-const-assignment-list ->  ident = number • [ ; , ] 
-state31 : 
-proc-decl ->  proc-decl procedure ident• ; block ; [ call begin if while ~ . procedure ; ] 
-state32 : 
-statement ->  ident :=• expression [ . end ; ] 
-expression -> • term [ . + - end ; ] 
-expression -> • adding-operator term [ . + - end ; ] 
-expression -> • expression adding-operator term [ . + - end ; ] 
-term -> • factor [ . * / + - end ; ] 
-term -> • term multiplying-operator factor [ . * / + - end ; ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-factor -> • ident [ . * / + - end ; ] 
-factor -> • number [ . * / + - end ; ] 
-factor -> • ( expression ) [ . * / + - end ; ] 
-state33 : 
-statement ->  call ident • [ . end ; ] 
-state34 : 
-statement ->  begin statement-list• end [ . end ; ] 
-statement-list ->  statement-list• ; statement [ end ; ] 
-state35 : 
-statement-list ->  statement • [ end ; ] 
-state36 : 
-statement ->  if condition• then statement [ . end ; ] 
-state37 : 
-condition ->  odd• expression [ then do ] 
-expression -> • term [ then + - do ] 
-expression -> • adding-operator term [ then + - do ] 
-expression -> • expression adding-operator term [ then + - do ] 
-term -> • factor [ then * / + - do ] 
-term -> • term multiplying-operator factor [ then * / + - do ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-factor -> • ident [ then * / + - do ] 
-factor -> • number [ then * / + - do ] 
-factor -> • ( expression ) [ then * / + - do ] 
-state38 : 
-condition ->  expression• relation expression [ then do ] 
-expression ->  expression• adding-operator term [ = <> < > <= >= + - ] 
-relation -> • = [ + - ( ] 
-relation -> • <> [ + - ( ] 
-relation -> • < [ + - ( ] 
-relation -> • > [ + - ( ] 
-relation -> • <= [ + - ( ] 
-relation -> • >= [ + - ( ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-state39 : 
-expression ->  term • [ = <> < > <= >= + - . then do ) end ; ] 
-term ->  term• multiplying-operator factor [ = <> < > <= >= * / + - . then do ) end ; ] 
-multiplying-operator -> • * [ ( ] 
-multiplying-operator -> • / [ ( ] 
-state40 : 
-expression ->  adding-operator• term [ = <> < > <= >= + - . then do ) end ; ] 
-term -> • factor [ = <> < > <= >= + - * / . then do ) end ; ] 
-term -> • term multiplying-operator factor [ = <> < > <= >= + - * / . then do ) end ; ] 
-factor -> • ident [ = <> < > <= >= + - * / . then do ) end ; ] 
-factor -> • number [ = <> < > <= >= + - * / . then do ) end ; ] 
-factor -> • ( expression ) [ = <> < > <= >= + - * / . then do ) end ; ] 
-state41 : 
-term ->  factor • [ = <> < > <= >= * / + - . then do ) end ; ] 
-state42 : 
-adding-operator ->  + • [ ( ] 
-state43 : 
-adding-operator ->  - • [ ( ] 
-state44 : 
-factor ->  ident • [ = <> < > <= >= * / + - . then do ) end ; ] 
-state45 : 
-factor ->  number • [ = <> < > <= >= * / + - . then do ) end ; ] 
-state46 : 
-factor ->  (• expression ) [ = <> < > <= >= * / + - . then do ) end ; ] 
-expression -> • term [ ) + - ] 
-expression -> • adding-operator term [ ) + - ] 
-expression -> • expression adding-operator term [ ) + - ] 
-term -> • factor [ ) * / + - ] 
-term -> • term multiplying-operator factor [ ) * / + - ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-factor -> • ident [ ) * / + - ] 
-factor -> • number [ ) * / + - ] 
-factor -> • ( expression ) [ ) * / + - ] 
-state47 : 
-statement ->  while condition• do statement [ . end ; ] 
-state48 : 
-ident-list ->  ident-list , ident • [ ; , ] 
-state49 : 
-const-assignment-list ->  const-assignment-list , ident =• number [ ; , ] 
-state50 : 
-proc-decl ->  proc-decl procedure ident ;• block ; [ call begin if while ~ . procedure ; ] 
-block -> • const-decl var-decl proc-decl statement [ ; ] 
-const-decl -> • const const-assignment-list ; [ var ~ ; ] 
-const-decl -> • ~ [ var ~ ; ] 
-state51 : 
-statement ->  ident := expression • [ . end ; ] 
-expression ->  expression• adding-operator term [ . + - end ; ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-state52 : 
-statement ->  begin statement-list end • [ . end ; ] 
-state53 : 
-statement-list ->  statement-list ;• statement [ end ; ] 
-statement -> • ident := expression [ end ; ] 
-statement -> • call ident [ end ; ] 
-statement -> • begin statement-list end [ end ; ] 
-statement -> • if condition then statement [ end ; ] 
-statement -> • while condition do statement [ end ; ] 
-statement -> • ~ [ end ; ] 
-state54 : 
-statement ->  if condition then• statement [ . end ; ] 
-statement -> • ident := expression [ . end ; ] 
-statement -> • call ident [ . end ; ] 
-statement -> • begin statement-list end [ . end ; ] 
-statement -> • if condition then statement [ . end ; ] 
-statement -> • while condition do statement [ . end ; ] 
-statement -> • ~ [ . end ; ] 
-state55 : 
-condition ->  odd expression • [ then do ] 
-expression ->  expression• adding-operator term [ then + - do ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-state56 : 
-condition ->  expression relation• expression [ then do ] 
-expression -> • term [ then do + - ] 
-expression -> • adding-operator term [ then do + - ] 
-expression -> • expression adding-operator term [ then do + - ] 
-term -> • factor [ then do * / + - ] 
-term -> • term multiplying-operator factor [ then do * / + - ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-factor -> • ident [ then do * / + - ] 
-factor -> • number [ then do * / + - ] 
-factor -> • ( expression ) [ then do * / + - ] 
-state57 : 
-expression ->  expression adding-operator• term [ = <> < > <= >= + - . then do ) end ; ] 
-term -> • factor [ = <> < > <= >= + - * / . then do ) end ; ] 
-term -> • term multiplying-operator factor [ = <> < > <= >= + - * / . then do ) end ; ] 
-factor -> • ident [ = <> < > <= >= + - * / . then do ) end ; ] 
-factor -> • number [ = <> < > <= >= + - * / . then do ) end ; ] 
-factor -> • ( expression ) [ = <> < > <= >= + - * / . then do ) end ; ] 
-state58 : 
-relation ->  = • [ + - ( ] 
-state59 : 
-relation ->  <> • [ + - ( ] 
-state60 : 
-relation ->  < • [ + - ( ] 
-state61 : 
-relation ->  > • [ + - ( ] 
-state62 : 
-relation ->  <= • [ + - ( ] 
-state63 : 
-relation ->  >= • [ + - ( ] 
-state64 : 
-term ->  term multiplying-operator• factor [ = <> < > <= >= * / + - . then do ) end ; ] 
-factor -> • ident [ = <> < > <= >= * / + - . then do ) end ; ] 
-factor -> • number [ = <> < > <= >= * / + - . then do ) end ; ] 
-factor -> • ( expression ) [ = <> < > <= >= * / + - . then do ) end ; ] 
-state65 : 
-multiplying-operator ->  * • [ ( ] 
-state66 : 
-multiplying-operator ->  / • [ ( ] 
-state67 : 
-expression ->  adding-operator term • [ = <> < > <= >= + - . then do ) end ; ] 
-term ->  term• multiplying-operator factor [ = <> < > <= >= + - * / . then do ) end ; ] 
-multiplying-operator -> • * [ ( ] 
-multiplying-operator -> • / [ ( ] 
-state68 : 
-factor ->  ( expression• ) [ = <> < > <= >= * / + - . then do ) end ; ] 
-expression ->  expression• adding-operator term [ ) + - ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-state69 : 
-statement ->  while condition do• statement [ . end ; ] 
-statement -> • ident := expression [ . end ; ] 
-statement -> • call ident [ . end ; ] 
-statement -> • begin statement-list end [ . end ; ] 
-statement -> • if condition then statement [ . end ; ] 
-statement -> • while condition do statement [ . end ; ] 
-statement -> • ~ [ . end ; ] 
-state70 : 
-const-assignment-list ->  const-assignment-list , ident = number • [ ; , ] 
-state71 : 
-proc-decl ->  proc-decl procedure ident ; block• ; [ call begin if while ~ . procedure ; ] 
-state72 : 
-statement-list ->  statement-list ; statement • [ end ; ] 
-state73 : 
-statement ->  if condition then statement • [ . end ; ] 
-state74 : 
-condition ->  expression relation expression • [ then do ] 
-expression ->  expression• adding-operator term [ then do + - ] 
-adding-operator -> • + [ ( ] 
-adding-operator -> • - [ ( ] 
-state75 : 
-expression ->  expression adding-operator term • [ = <> < > <= >= + - . then do ) end ; ] 
-term ->  term• multiplying-operator factor [ = <> < > <= >= + - * / . then do ) end ; ] 
-multiplying-operator -> • * [ ( ] 
-multiplying-operator -> • / [ ( ] 
-state76 : 
-term ->  term multiplying-operator factor • [ = <> < > <= >= * / + - . then do ) end ; ] 
-state77 : 
-factor ->  ( expression ) • [ = <> < > <= >= * / + - . then do ) end ; ] 
-state78 : 
-statement ->  while condition do statement • [ . end ; ] 
-state79 : 
-proc-decl ->  proc-decl procedure ident ; block ; • [ call begin if while ~ . procedure ; ] 
+factor ->  ( expr ) • [ $ + - * / ) ] 
 ---------------------------
 lr action table:
-STATE 	program	block	.	const-decl	var-decl	proc-decl	statement	const	const-assignment-list	;	~	ident	=	number	,	var	ident-list	procedure	:=	expression	call	begin	statement-list	end	if	condition	then	while	do	odd	relation	<>	<	>	<=	>=	term	adding-operator	+	-	factor	multiplying-operator	*	/	(	)	$	program'	
-0	G1	G2	-	G3	-	-	-	S4	-	-	S5	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-1	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	accept	-	
-2	-	-	S6	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-3	-	-	-	-	G7	-	-	-	-	-	S9	-	-	-	-	S8	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-4	-	-	-	-	-	-	-	-	G10	-	-	G11	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-5	-	-	R4	-	-	-	-	-	-	R4	R4	-	-	-	-	R4	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-6	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R1	-	
-7	-	-	-	-	-	G12	-	-	-	-	S13	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-8	-	-	-	-	-	-	-	-	-	-	-	G15	-	-	-	-	G14	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-9	-	-	R8	-	-	-	-	-	-	R8	R8	-	-	-	-	-	-	R8	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-10	-	-	-	-	-	-	-	-	-	S16	-	-	-	-	S17	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-11	-	-	-	-	-	-	-	-	-	-	-	-	S18	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-12	-	-	-	-	-	-	G19	-	-	-	S26	G21	-	-	-	-	-	S20	-	-	S22	S23	-	-	S24	-	-	S25	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-13	-	-	R12	-	-	-	-	-	-	R12	R12	-	-	-	-	-	-	R12	-	-	R12	R12	-	-	R12	-	-	R12	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-14	-	-	-	-	-	-	-	-	-	S27	-	-	-	-	S28	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-15	-	-	-	-	-	-	-	-	-	R9	-	-	-	-	R9	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-16	-	-	R3	-	-	-	-	-	-	R3	R3	-	-	-	-	R3	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-17	-	-	-	-	-	-	-	-	-	-	-	G29	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-18	-	-	-	-	-	-	-	-	-	-	-	-	-	G30	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-19	-	-	R2	-	-	-	-	-	-	R2	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-20	-	-	-	-	-	-	-	-	-	-	-	G31	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-21	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	S32	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-22	-	-	-	-	-	-	-	-	-	-	-	G33	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-23	-	-	-	-	-	-	G35	-	-	-	S35	G35	-	-	-	-	-	-	-	-	S35	S35	G34	-	S35	-	-	S35	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-24	-	-	-	-	-	-	-	-	-	-	-	G44	-	G45	-	-	-	-	-	G38	-	-	-	-	-	G36	-	-	-	S37	-	-	-	-	-	-	G39	G40	S42	S43	G41	-	-	-	S46	-	-	-	
-25	-	-	-	-	-	-	-	-	-	-	-	G47	-	G47	-	-	-	-	-	G47	-	-	-	-	-	G47	-	-	-	S47	-	-	-	-	-	-	G47	G47	S47	S47	G47	-	-	-	S47	-	-	-	
-26	-	-	R18	-	-	-	-	-	-	R18	-	-	-	-	-	-	-	-	-	-	-	-	-	R18	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-27	-	-	R7	-	-	-	-	-	-	R7	R7	-	-	-	-	-	-	R7	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-28	-	-	-	-	-	-	-	-	-	-	-	G48	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-29	-	-	-	-	-	-	-	-	-	-	-	-	S49	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-30	-	-	-	-	-	-	-	-	-	R5	-	-	-	-	R5	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-31	-	-	-	-	-	-	-	-	-	S50	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-32	-	-	-	-	-	-	-	-	-	-	-	G51	-	G51	-	-	-	-	-	G51	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G51	G51	S51	S51	G51	-	-	-	S51	-	-	-	
-33	-	-	R14	-	-	-	-	-	-	R14	-	-	-	-	-	-	-	-	-	-	-	-	-	R14	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-34	-	-	-	-	-	-	-	-	-	S53	-	-	-	-	-	-	-	-	-	-	-	-	-	S52	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-35	-	-	-	-	-	-	-	-	-	R19	-	-	-	-	-	-	-	-	-	-	-	-	-	R19	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-36	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	S54	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-37	-	-	-	-	-	-	-	-	-	-	-	G55	-	G55	-	-	-	-	-	G55	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G55	G55	S55	S55	G55	-	-	-	S55	-	-	-	
-38	-	-	-	-	-	-	-	-	-	-	-	-	S58	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G56	S59	S60	S61	S62	S63	-	G57	S63	S63	-	-	-	-	-	-	-	-	
-39	-	-	R29	-	-	-	-	-	-	R29	-	-	R29	-	-	-	-	-	-	-	-	-	-	R29	-	-	R29	-	R29	-	-	R29	R29	R29	R29	R29	-	-	R29	R29	-	G64	S65	S66	-	R29	-	-	
-40	-	-	-	-	-	-	-	-	-	-	-	G67	-	G67	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G67	-	-	-	G67	-	-	-	S67	-	-	-	
-41	-	-	R34	-	-	-	-	-	-	R34	-	-	R34	-	-	-	-	-	-	-	-	-	-	R34	-	-	R34	-	R34	-	-	R34	R34	R34	R34	R34	-	-	R34	R34	-	-	R34	R34	-	R34	-	-	
-42	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R32	-	-	-	
-43	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R33	-	-	-	
-44	-	-	R38	-	-	-	-	-	-	R38	-	-	R38	-	-	-	-	-	-	-	-	-	-	R38	-	-	R38	-	R38	-	-	R38	R38	R38	R38	R38	-	-	R38	R38	-	-	R38	R38	-	R38	-	-	
-45	-	-	R39	-	-	-	-	-	-	R39	-	-	R39	-	-	-	-	-	-	-	-	-	-	R39	-	-	R39	-	R39	-	-	R39	R39	R39	R39	R39	-	-	R39	R39	-	-	R39	R39	-	R39	-	-	
-46	-	-	-	-	-	-	-	-	-	-	-	G68	-	G68	-	-	-	-	-	G68	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G68	G68	S68	S68	G68	-	-	-	S68	-	-	-	
-47	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	S69	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-48	-	-	-	-	-	-	-	-	-	R10	-	-	-	-	R10	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-49	-	-	-	-	-	-	-	-	-	-	-	-	-	G70	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-50	-	G71	-	G71	-	-	-	S71	-	-	S71	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-51	-	-	R13	-	-	-	-	-	-	R13	-	-	-	-	-	-	-	-	-	-	-	-	-	R13	-	-	-	-	-	-	-	-	-	-	-	-	-	G71	S71	S71	-	-	-	-	-	-	-	-	
-52	-	-	R15	-	-	-	-	-	-	R15	-	-	-	-	-	-	-	-	-	-	-	-	-	R15	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-53	-	-	-	-	-	-	G72	-	-	-	S72	G72	-	-	-	-	-	-	-	-	S72	S72	-	-	S72	-	-	S72	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-54	-	-	-	-	-	-	G73	-	-	-	S73	G73	-	-	-	-	-	-	-	-	S73	S73	-	-	S73	-	-	S73	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-55	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R21	-	R21	-	-	-	-	-	-	-	-	G73	S73	S73	-	-	-	-	-	-	-	-	
-56	-	-	-	-	-	-	-	-	-	-	-	G74	-	G74	-	-	-	-	-	G74	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G74	G74	S74	S74	G74	-	-	-	S74	-	-	-	
-57	-	-	-	-	-	-	-	-	-	-	-	G75	-	G75	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G75	-	-	-	G75	-	-	-	S75	-	-	-	
-58	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R23	R23	-	-	-	-	R23	-	-	-	
-59	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R24	R24	-	-	-	-	R24	-	-	-	
-60	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R25	R25	-	-	-	-	R25	-	-	-	
-61	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R26	R26	-	-	-	-	R26	-	-	-	
-62	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R27	R27	-	-	-	-	R27	-	-	-	
-63	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R28	R28	-	-	-	-	R28	-	-	-	
-64	-	-	-	-	-	-	-	-	-	-	-	G76	-	G76	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G76	-	-	-	S76	-	-	-	
-65	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R36	-	-	-	
-66	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R37	-	-	-	
-67	-	-	R30	-	-	-	-	-	-	R30	-	-	R30	-	-	-	-	-	-	-	-	-	-	R30	-	-	R30	-	R30	-	-	R30	R30	R30	R30	R30	-	-	R30	R30	-	G76	S76	S76	-	R30	-	-	
-68	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	G77	S77	S77	-	-	-	-	-	S77	-	-	
-69	-	-	-	-	-	-	G78	-	-	-	S78	G78	-	-	-	-	-	-	-	-	S78	S78	-	-	S78	-	-	S78	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-70	-	-	-	-	-	-	-	-	-	R6	-	-	-	-	R6	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-71	-	-	-	-	-	-	-	-	-	S79	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-72	-	-	-	-	-	-	-	-	-	R20	-	-	-	-	-	-	-	-	-	-	-	-	-	R20	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-73	-	-	R16	-	-	-	-	-	-	R16	-	-	-	-	-	-	-	-	-	-	-	-	-	R16	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-74	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	R22	-	R22	-	-	-	-	-	-	-	-	G79	S79	S79	-	-	-	-	-	-	-	-	
-75	-	-	R31	-	-	-	-	-	-	R31	-	-	R31	-	-	-	-	-	-	-	-	-	-	R31	-	-	R31	-	R31	-	-	R31	R31	R31	R31	R31	-	-	R31	R31	-	G79	S79	S79	-	R31	-	-	
-76	-	-	R35	-	-	-	-	-	-	R35	-	-	R35	-	-	-	-	-	-	-	-	-	-	R35	-	-	R35	-	R35	-	-	R35	R35	R35	R35	R35	-	-	R35	R35	-	-	R35	R35	-	R35	-	-	
-77	-	-	R40	-	-	-	-	-	-	R40	-	-	R40	-	-	-	-	-	-	-	-	-	-	R40	-	-	R40	-	R40	-	-	R40	R40	R40	R40	R40	-	-	R40	R40	-	-	R40	R40	-	R40	-	-	
-78	-	-	R17	-	-	-	-	-	-	R17	-	-	-	-	-	-	-	-	-	-	-	-	-	R17	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
-79	-	-	R11	-	-	-	-	-	-	R11	R11	-	-	-	-	-	-	R11	-	-	R11	R11	-	-	R11	-	-	R11	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	-	
+STATE 	expr	+	term	-	*	factor	/	(	)	num	$	expr'	
+0	G1	-	G2	S6	-	G3	-	S4	-	S5	-	-	
+1	-	S7	-	S8	-	-	-	-	-	-	accept	-	
+2	-	R3	-	R3	S9	-	S10	-	R3	-	R3	-	
+3	-	R6	-	R6	R6	-	R6	-	R6	-	R6	-	
+4	G11	-	G11	S11	-	G11	-	S11	-	S11	-	-	
+5	-	R8	-	R8	R8	-	R8	-	R8	-	R8	-	
+6	-	-	-	S12	-	G12	-	S12	-	S12	-	-	
+7	-	-	G13	S13	-	G13	-	S13	-	S13	-	-	
+8	-	-	G14	S14	-	G14	-	S14	-	S14	-	-	
+9	-	-	-	S15	-	G15	-	S15	-	S15	-	-	
+10	-	-	-	S16	-	G16	-	S16	-	S16	-	-	
+11	-	S17	-	S17	-	-	-	-	S17	-	-	-	
+12	-	R9	-	R9	R9	-	R9	-	R9	-	R9	-	
+13	-	R1	-	R1	S17	-	S17	-	R1	-	R1	-	
+14	-	R2	-	R2	S17	-	S17	-	R2	-	R2	-	
+15	-	R4	-	R4	R4	-	R4	-	R4	-	R4	-	
+16	-	R5	-	R5	R5	-	R5	-	R5	-	R5	-	
+17	-	R7	-	R7	R7	-	R7	-	R7	-	R7	-	

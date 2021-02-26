@@ -4,6 +4,16 @@
 CMakeFiles/LALR1.dir/lalr1.cc.o: lalr1.cc
 CMakeFiles/LALR1.dir/lalr1.cc.o: lalr1.h
 
+CMakeFiles/LALR1.dir/lexer.cc.o: lexer.cc
+CMakeFiles/LALR1.dir/lexer.cc.o: lexer.h
+
 CMakeFiles/LALR1.dir/main.cc.o: lalr1.h
+CMakeFiles/LALR1.dir/main.cc.o: lexer.h
 CMakeFiles/LALR1.dir/main.cc.o: main.cc
+CMakeFiles/LALR1.dir/main.cc.o: parser.h
+
+CMakeFiles/LALR1.dir/parser.cc.o: lalr1.h
+CMakeFiles/LALR1.dir/parser.cc.o: lexer.h
+CMakeFiles/LALR1.dir/parser.cc.o: parser.cc
+CMakeFiles/LALR1.dir/parser.cc.o: parser.h
 

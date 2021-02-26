@@ -150,6 +150,33 @@ lalr1.cc.s:
 	$(MAKE) -f CMakeFiles/LALR1.dir/build.make CMakeFiles/LALR1.dir/lalr1.cc.s
 .PHONY : lalr1.cc.s
 
+lexer.o: lexer.cc.o
+
+.PHONY : lexer.o
+
+# target to build an object file
+lexer.cc.o:
+	$(MAKE) -f CMakeFiles/LALR1.dir/build.make CMakeFiles/LALR1.dir/lexer.cc.o
+.PHONY : lexer.cc.o
+
+lexer.i: lexer.cc.i
+
+.PHONY : lexer.i
+
+# target to preprocess a source file
+lexer.cc.i:
+	$(MAKE) -f CMakeFiles/LALR1.dir/build.make CMakeFiles/LALR1.dir/lexer.cc.i
+.PHONY : lexer.cc.i
+
+lexer.s: lexer.cc.s
+
+.PHONY : lexer.s
+
+# target to generate assembly for a file
+lexer.cc.s:
+	$(MAKE) -f CMakeFiles/LALR1.dir/build.make CMakeFiles/LALR1.dir/lexer.cc.s
+.PHONY : lexer.cc.s
+
 main.o: main.cc.o
 
 .PHONY : main.o
@@ -177,6 +204,33 @@ main.cc.s:
 	$(MAKE) -f CMakeFiles/LALR1.dir/build.make CMakeFiles/LALR1.dir/main.cc.s
 .PHONY : main.cc.s
 
+parser.o: parser.cc.o
+
+.PHONY : parser.o
+
+# target to build an object file
+parser.cc.o:
+	$(MAKE) -f CMakeFiles/LALR1.dir/build.make CMakeFiles/LALR1.dir/parser.cc.o
+.PHONY : parser.cc.o
+
+parser.i: parser.cc.i
+
+.PHONY : parser.i
+
+# target to preprocess a source file
+parser.cc.i:
+	$(MAKE) -f CMakeFiles/LALR1.dir/build.make CMakeFiles/LALR1.dir/parser.cc.i
+.PHONY : parser.cc.i
+
+parser.s: parser.cc.s
+
+.PHONY : parser.s
+
+# target to generate assembly for a file
+parser.cc.s:
+	$(MAKE) -f CMakeFiles/LALR1.dir/build.make CMakeFiles/LALR1.dir/parser.cc.s
+.PHONY : parser.cc.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -189,9 +243,15 @@ help:
 	@echo "... lalr1.o"
 	@echo "... lalr1.i"
 	@echo "... lalr1.s"
+	@echo "... lexer.o"
+	@echo "... lexer.i"
+	@echo "... lexer.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... parser.o"
+	@echo "... parser.i"
+	@echo "... parser.s"
 .PHONY : help
 
 

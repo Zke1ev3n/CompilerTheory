@@ -1,0 +1,145 @@
+STATE 0:
+	program -> * exp $
+	exp -> * exp MINUS exp
+	exp -> * exp PLUS exp
+	exp -> * exp TIMES exp
+	exp -> * exp DIV exp
+	exp -> * INT
+
+	INT SHIFT 2
+	exp GOTO 1
+
+STATE 1:
+	program ->  exp* $
+	exp ->  exp* MINUS exp
+	exp ->  exp* PLUS exp
+	exp ->  exp* TIMES exp
+	exp ->  exp* DIV exp
+
+	$ ACCEPT
+	MINUS SHIFT 3
+	PLUS SHIFT 4
+	TIMES SHIFT 5
+	DIV SHIFT 6
+
+STATE 2:
+	exp ->  INT*
+
+	$ REDUCE 5
+	MINUS REDUCE 5
+	PLUS REDUCE 5
+	TIMES REDUCE 5
+	DIV REDUCE 5
+
+STATE 3:
+	exp ->  exp MINUS* exp
+	exp -> * exp MINUS exp
+	exp -> * exp PLUS exp
+	exp -> * exp TIMES exp
+	exp -> * exp DIV exp
+	exp -> * INT
+
+	INT SHIFT 2
+	exp GOTO 7
+
+STATE 4:
+	exp ->  exp PLUS* exp
+	exp -> * exp MINUS exp
+	exp -> * exp PLUS exp
+	exp -> * exp TIMES exp
+	exp -> * exp DIV exp
+	exp -> * INT
+
+	INT SHIFT 2
+	exp GOTO 8
+
+STATE 5:
+	exp ->  exp TIMES* exp
+	exp -> * exp MINUS exp
+	exp -> * exp PLUS exp
+	exp -> * exp TIMES exp
+	exp -> * exp DIV exp
+	exp -> * INT
+
+	INT SHIFT 2
+	exp GOTO 9
+
+STATE 6:
+	exp ->  exp DIV* exp
+	exp -> * exp MINUS exp
+	exp -> * exp PLUS exp
+	exp -> * exp TIMES exp
+	exp -> * exp DIV exp
+	exp -> * INT
+
+	INT SHIFT 2
+	exp GOTO 10
+
+STATE 7:
+	exp ->  exp MINUS exp*
+	exp ->  exp* MINUS exp
+	exp ->  exp* PLUS exp
+	exp ->  exp* TIMES exp
+	exp ->  exp* DIV exp
+
+	$ REDUCE 1
+	MINUS SHRESOLVED
+	MINUS REDUCE 1
+	PLUS SHRESOLVED
+	PLUS REDUCE 1
+	TIMES SHIFT 5
+	TIMES RDRESOLVED
+	DIV SHIFT 6
+	DIV RDRESOLVED
+
+STATE 8:
+	exp ->  exp PLUS exp*
+	exp ->  exp* MINUS exp
+	exp ->  exp* PLUS exp
+	exp ->  exp* TIMES exp
+	exp ->  exp* DIV exp
+
+	$ REDUCE 2
+	MINUS SHRESOLVED
+	MINUS REDUCE 2
+	PLUS SHRESOLVED
+	PLUS REDUCE 2
+	TIMES SHIFT 5
+	TIMES RDRESOLVED
+	DIV SHIFT 6
+	DIV RDRESOLVED
+
+STATE 9:
+	exp ->  exp TIMES exp*
+	exp ->  exp* MINUS exp
+	exp ->  exp* PLUS exp
+	exp ->  exp* TIMES exp
+	exp ->  exp* DIV exp
+
+	$ REDUCE 3
+	MINUS SHRESOLVED
+	MINUS REDUCE 3
+	PLUS SHRESOLVED
+	PLUS REDUCE 3
+	TIMES SHRESOLVED
+	TIMES REDUCE 3
+	DIV SHRESOLVED
+	DIV REDUCE 3
+
+STATE 10:
+	exp ->  exp DIV exp*
+	exp ->  exp* MINUS exp
+	exp ->  exp* PLUS exp
+	exp ->  exp* TIMES exp
+	exp ->  exp* DIV exp
+
+	$ REDUCE 4
+	MINUS SHRESOLVED
+	MINUS REDUCE 4
+	PLUS SHRESOLVED
+	PLUS REDUCE 4
+	TIMES SHRESOLVED
+	TIMES REDUCE 4
+	DIV SHRESOLVED
+	DIV REDUCE 4
+

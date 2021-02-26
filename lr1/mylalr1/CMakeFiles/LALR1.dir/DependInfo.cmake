@@ -5,7 +5,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.cc" "/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/CMakeFiles/LALR1.dir/lalr1.cc.o"
+  "/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lexer.cc" "/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/CMakeFiles/LALR1.dir/lexer.cc.o"
   "/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/main.cc" "/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/CMakeFiles/LALR1.dir/main.cc.o"
+  "/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/parser.cc" "/Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/CMakeFiles/LALR1.dir/parser.cc.o"
   )
 set(CMAKE_CXX_COMPILER_ID "AppleClang")
 

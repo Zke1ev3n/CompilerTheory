@@ -3,4 +3,4 @@ project(LALR1)
 
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_CXX_FLAGS "-static-libstdc++")
-add_executable(LALR1 main.cc lalr1.cc)
+add_executable(LALR1 main.cc lalr1.cc lexer.cc parser.cc)

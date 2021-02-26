@@ -106,6 +106,16 @@ class LALR1{
     vector<AssocPrec> assoc_precs;
 
 public:
+    //导出的符号映射表
+    map<string, int> symbol_map;
+
+    vector<vector<pair<int, int>>> output_table;
+
+    //reduce的时候，产生式的index, 左边的符号的index，右边的符号个数
+    map<int, pair<int, int>>  reduce_map;
+    
+
+public:
     //解析bnf文件
     void Init(const string filename);
     //保存产生式
@@ -129,6 +139,7 @@ public:
     LR_State LRGoto(LR_State& state, Symbol* sym);
     int AddLRGoto(LR_State& state, Symbol* sym, int index);
     void MakeLALR1Table();
+    void MakeOutputTable();
     int ResolveConflict(Action& a1, Action& a2);
     //测试输出
     void PrintTest();

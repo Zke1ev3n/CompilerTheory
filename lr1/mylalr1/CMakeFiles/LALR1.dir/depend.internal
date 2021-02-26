@@ -4,6 +4,16 @@
 CMakeFiles/LALR1.dir/lalr1.cc.o
  /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.cc
  /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.h
+CMakeFiles/LALR1.dir/lexer.cc.o
+ /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lexer.cc
+ /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lexer.h
 CMakeFiles/LALR1.dir/main.cc.o
  /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.h
+ /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lexer.h
  /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/main.cc
+ /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/parser.h
+CMakeFiles/LALR1.dir/parser.cc.o
+ /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lalr1.h
+ /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/lexer.h
+ /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/parser.cc
+ /Users/liangyulin/Workspace/Dev/VSCodeProjects/CompilerTheory/lr1/mylalr1/parser.h

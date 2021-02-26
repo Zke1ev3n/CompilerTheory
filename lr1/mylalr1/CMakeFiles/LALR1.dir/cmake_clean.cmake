@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/LALR1.dir/lalr1.cc.o"
+  "CMakeFiles/LALR1.dir/lexer.cc.o"
   "CMakeFiles/LALR1.dir/main.cc.o"
+  "CMakeFiles/LALR1.dir/parser.cc.o"
   "LALR1"
   "LALR1.pdb"
 )
